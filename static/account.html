@@ -23,7 +23,7 @@
     <header class="account-header cs-page-header">
       <div>
         <h1 class="page-title">User Settings</h1>
-        <p class="page-subtitle">Manage your profile, teammates, alerts, and screening preferences.</p>
+        <p class="page-subtitle">Manage your profile, alerts, and screening preferences.</p>
       </div>
 
       <div class="account-header-actions action-bar">
@@ -48,10 +48,6 @@
           <span class="rail-dot"></span>
           Overview
         </button>
-        <button class="rail-item" data-tab="team">
-          <span class="rail-dot"></span>
-          Teammates
-        </button>
         <button class="rail-item" data-tab="alerts">
           <span class="rail-dot"></span>
           Email Alerts
@@ -70,10 +66,6 @@
           <span class="rail-dot"></span>
           Overview
         </button>
-        <button class="rail-item" data-tab="team">
-          <span class="rail-dot"></span>
-          Teammates
-        </button>
         <button class="rail-item" data-tab="alerts">
           <span class="rail-dot"></span>
           Email Alerts
@@ -90,7 +82,7 @@
         <section class="tab-panel is-active" id="tab-overview">
           <div class="card">
             <div class="card-head card-header">
-              <h2>Account Snapshot</h2>
+              <h2>User Profile</h2>
             </div>
 
             <div class="kv-grid">
@@ -152,60 +144,6 @@
           </div>
 
 
-        </section>
-
-        <!-- TEAM -->
-        <section class="tab-panel" id="tab-team">
-          <div class="card">
-            <div class="card-head card-header">
-              <h2>Teammates</h2>
-              <p class="muted">Invite teammates to your workspace and manage access.</p>
-            </div>
-        
-            <div class="row team-invite-row">
-              <div class="team-invite-email-col">
-                <div class="row-title" style="margin-bottom:6px;">Invite by email</div>
-                <input id="team-invite-email" class="api-input" type="email" placeholder="name@company.com" />
-              </div>
-        
-              <div class="team-invite-role-col">
-                <div class="row-title" style="margin-bottom:6px;">Role</div>
-                <select id="team-invite-role" class="api-input">
-                  <option value="MEMBER">Member</option>
-                  <option value="ADMIN">Admin</option>
-                </select>
-              </div>
-        
-              <div class="row-actions">
-                <button class="btn-primary" id="btn-team-invite">Send invite</button>
-              </div>
-            </div>
-        
-            <div class="divider"></div>
-        
-            <div class="row team-section-head-row">
-              <div>
-                <div class="row-title">Members</div>
-                <div class="row-sub">Active users in this workspace.</div>
-              </div>
-              <button class="btn-ghost" id="btn-team-refresh">Refresh</button>
-            </div>
-        
-            <div id="team-members" class="muted">Loading…</div>
-        
-            <div class="divider"></div>
-        
-            <div class="row team-section-head-row">
-              <div>
-                <div class="row-title">Pending invites</div>
-                <div class="row-sub">Invites not accepted yet.</div>
-              </div>
-            </div>
-        
-            <div id="team-invites" class="muted">Loading…</div>
-        
-            <div class="muted" id="team-msg" style="margin-top:10px; display:none;"></div>
-          </div>
         </section>
 
         <!-- ALERTS -->

@@ -8,7 +8,6 @@
   const railItems = Array.from(document.querySelectorAll(".rail-item"));
   const panels = {
     overview: $("tab-overview"),
-    team: $("tab-team"),
     alerts: $("tab-alerts"),
     screening: $("tab-screening"),
   };
@@ -417,14 +416,6 @@ document.getElementById("btn-team-invite")?.addEventListener("click", async () =
 });
 
 document.getElementById("btn-team-refresh")?.addEventListener("click", () => loadTeam());
-
-// Load team data whenever the Team tab becomes active
-// (easy: call it once on page load, and again on tab click if you want)
-setTimeout(() => {
-  // safe: only loads if endpoints exist
-  loadTeam().catch(() => {});
-}, 0);
-  
 
   // -----------------------------
   // Renderers (optional sections)
@@ -2717,8 +2708,6 @@ $("btn-openapi-spec")?.addEventListener("click", () => {
   
   loadEverything()
   .then(() => {
-    wireAgreementUploadModalOnce();
-    wireAgreementDeleteModalOnce();
 wireScreeningRuleGroupModalOnce();
 wireScreeningRuleGroupRenameModalOnce();
 wireScreeningRuleGroupAssignModalOnce();

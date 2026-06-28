@@ -1759,7 +1759,7 @@ th.sortable.sorted-desc .sort-icon::before{
 
 
 /* =========================
-   GRID MODE BAR (My Carriers vs Search Results)
+   GRID MODE BAR (Carriers vs Search Results)
    ========================= */
 
 .grid-modebar{
@@ -2630,7 +2630,7 @@ body.app-page #site-header .header-container{
 }
 
 /* =========================
-   MOBILE PATCH 2 — Homepage / My Carriers simplification
+   MOBILE PATCH 2 — Homepage / Carriers simplification
    ========================= */
 @media (max-width: 768px){
   body.carrier-list .page{

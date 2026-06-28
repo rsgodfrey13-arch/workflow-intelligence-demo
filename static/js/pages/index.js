@@ -256,13 +256,13 @@ function normDot(val) {
 
 
     // Header copy
-    if (titleEl) titleEl.textContent = isSearch ? "Search Results" : "My Carriers";
+    if (titleEl) titleEl.textContent = isSearch ? "Search Results" : "Carriers";
     if (subtitleEl)
       subtitleEl.textContent = isSearch
         ? "Showing carriers matching your search."
         : "Click a DOT number to open its profile page.";
 
-    if (modePill) modePill.textContent = isSearch ? "Viewing: Search Results" : "Viewing: My Carriers";
+    if (modePill) modePill.textContent = isSearch ? "Viewing: Search Results" : "Viewing: Carriers";
 
     if (queryEl) {
       if (isSearch && searchQuery) {
@@ -755,7 +755,7 @@ data.forEach((c) => {
         
         if (gridMode === "SEARCH" && isMine) {
           row.classList.add("is-mine");
-          selectCell.innerHTML = `<span class="saved-check" title="Already in My Carriers">✓</span>`;
+          selectCell.innerHTML = `<span class="saved-check" title="Already in Carriers">✓</span>`;
         } else {
           const checkbox = document.createElement("input");
           checkbox.type = "checkbox";
@@ -1254,8 +1254,8 @@ function wireCsvDownload() {
       const count = selected.length;
       // Label changes by mode
       bulkRemoveBtn.textContent = gridMode === "SEARCH"
-        ? "ADD SELECTED TO MY CARRIERS"
-        : "REMOVE SELECTED FROM MY CARRIERS";
+        ? "ADD SELECTED TO CARRIERS"
+        : "REMOVE SELECTED FROM CARRIERS";
 
 
       if (count === 0) {
@@ -1289,7 +1289,7 @@ bulkRemoveBtn.addEventListener("click", async () => {
   if (isSearchMode) {
 const ok = await window.showConfirm({
   title: `Add ${selected.length} carriers?`,
-  message: `Add ${selected.length} carriers to My Carriers?`,
+  message: `Add ${selected.length} carriers to Carriers?`,
   confirmText: "Add",
   confirmVariant: "primary"
 });
@@ -1318,7 +1318,7 @@ const ok = await window.showConfirm({
     const limit = Number(me.carrier_limit ?? 0);
     const count = Number(me.carrier_count ?? 0);
     
-    // only count dots that are NOT already in My Carriers
+    // only count dots that are not already in Carriers
     const newDots = dots
       .map(normDot)
       .filter(Boolean)
@@ -1424,7 +1424,7 @@ selected.forEach((cb) => {
   const row = cb.closest("tr");
   const cell = cb.closest("td");
   if (row) row.classList.add("is-mine");
-  if (cell) cell.innerHTML = `<span class="saved-check" title="Already in My Carriers">✓</span>`;
+  if (cell) cell.innerHTML = `<span class="saved-check" title="Already in Carriers">✓</span>`;
 });
 
       // hide bulk UI
@@ -1440,7 +1440,7 @@ selected.forEach((cb) => {
   // ---- MY mode: remove (your existing logic) ----
 const ok = await window.showConfirm({
   title: `Remove ${selected.length} carriers?`,
-  message: `Remove ${selected.length} carriers from My Carriers?`,
+  message: `Remove ${selected.length} carriers from Carriers?`,
   confirmText: "Remove",
   confirmVariant: "danger"
 });

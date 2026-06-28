@@ -8,7 +8,7 @@
 const slides = [
   {
     title: "One place to verify, document, and monitor carriers.",
-    body: "Carrier Shark is a carrier management platform structured for onboarding, agreements, insurance, and change alerts. Take the quick tour to learn more."
+    body: "Carrier Shark is a carrier management prototype for carrier search, screening, documents, and change alerts. Take the quick tour to learn more."
   },
   {
     title: "Search any Carrier",
@@ -23,15 +23,14 @@ const slides = [
   • Authority & operating status<br>
   • Safety & inspection history<br>
   • Equipment & operations<br>
-  • Insurance coverage<br>
-  • Agreements & documents
+  • Carrier documents
   `,
     img: "/static/images/tour/carrier_profile.png"
   },
   {
     title: "Build your carrier watchlist",
     body: `
-  Add carriers to <strong>My Carriers</strong> so Carrier Shark can monitor authority, safety, and insurance changes automatically.
+  Add carriers to <strong>Carriers</strong> so Carrier Shark can monitor authority and safety changes automatically.
   <br><br>
   Get notified when something changes:
   <br><br>
@@ -62,18 +61,9 @@ Carrier Shark instantly returns a pass or fail result and shows exactly why the 
   imgPosition: "left top"
 },
   {
-    title: "Send agreements and collect documents",
-    body: `
-  Send contracts for secure e-signature and receive W-9s, insurance certificates, ACH forms, and more.
-  <br><br>
-  Carrier Shark keeps everything organized automatically.
-  `,
-    img: "/static/images/tour/send_contract.png"
-  },
-  {
     title: "Get alerts when something changes",
     body: `
-  Carrier Shark monitors your carriers for authority, safety, insurance, and compliance changes.
+  Carrier Shark monitors your carriers for authority, safety, and compliance changes.
   <br><br>
   Choose exactly what to monitor and receive alerts by email, webhooks, or the REST API.
   `,
@@ -82,7 +72,7 @@ Carrier Shark instantly returns a pass or fail result and shows exactly why the 
     {
     title: "Ready for more advanced workflows?",
     body: `
-Carrier Shark also includes APIs for teams that want to connect carrier search, alerts, saved carriers, contracts, and onboarding directly into their own systems.
+Carrier Shark also includes APIs for connecting carrier search, alerts, saved carriers, and screening directly into other systems.
 
 <br><br>
 
@@ -100,7 +90,7 @@ Use Carrier Shark inside your:
   {
     title: "You’re ready.",
     body: `
-  Start by searching for a carrier, open the profile, and add it to My Carriers.
+  Start by searching for a carrier, open the profile, and add it to Carriers.
   <br><br>
   Carrier Shark will monitor the carrier and alert you when something changes.
   `,

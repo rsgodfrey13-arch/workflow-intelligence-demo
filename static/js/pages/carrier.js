@@ -2824,7 +2824,7 @@ if (emailBtn) {
     if (!isSaved) {
       return showFeatureGate({
         title: "Add this carrier to enable alerts",
-        body: "Email Alerts work after you add this carrier to My Carriers.",
+        body: "Email Alerts work after you add this carrier to Carriers.",
         primaryText: "Add Carrier",
         onPrimary: () => addBtn.click(),
       });
