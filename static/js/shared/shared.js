@@ -43,39 +43,6 @@ async function loadHeader() {
   }
 }
 
-function hasSelectedPlan(user) {
-  const plan = String(user?.plan || "").trim().toLowerCase();
-  if (!plan) return false;
-  return !["none", "no_plan", "no-plan", "unselected"].includes(plan);
-}
-
-function renderActivationBanner(user) {
-  const host = document.getElementById("site-header");
-  if (!host) return;
-
-  const existing = document.getElementById("cs-activation-banner");
-  if (existing) existing.remove();
-
-  if (!user || !window.csIsLoggedIn || hasSelectedPlan(user)) return;
-  if (window.location.pathname === "/activate-plan") return;
-
-  const shell = document.createElement("section");
-  shell.id = "cs-activation-banner";
-  shell.className = "cs-activation-banner-shell";
-  shell.innerHTML = `
-    <div class="cs-activation-banner" role="status" aria-live="polite">
-      <div class="cs-activation-copy">
-        <h2>Activate your account to start using Carrier Shark</h2>
-        <p>Choose a plan to add carriers, monitor changes, and manage agreements. Plans start at $0.</p>
-      </div>
-      <a class="cs-activation-cta" href="/activate-plan">Choose Plan</a>
-    </div>
-  `;
-
-  host.insertAdjacentElement("afterend", shell);
-}
-
-
 async function loadHeaderSlim() {
   const container = document.getElementById("site-header");
   if (!container) return;
@@ -150,27 +117,6 @@ window.showConfirm = function ({
     };
   });
 };
-
-function setHelpMenu(isLoggedIn) {
-  const helpLabel = document.getElementById("help-label");
-  const helpMenu = document.getElementById("help-menu");
-
-  // If header isn't present on this page, skip
-  if (!helpLabel || !helpMenu) return;
-
-  if (isLoggedIn) {
-// Logged-in support menu
-helpMenu.innerHTML = `
-  <a href="/account#help" class="nav-dd-link" role="menuitem">Open a Support Ticket</a>
-  <a href="/help" class="nav-dd-link" role="menuitem">Help Center</a>
-`;
-  } else {
-// Logged-out help menu
-helpMenu.innerHTML = `
-  <a href="/help" class="nav-dd-link" role="menuitem">Help Center</a>
-`;
-  }
-}
 
 const DESKTOP_AUTH_DISPLAY = "inline-flex";
 
@@ -561,8 +507,6 @@ async function initAuthUI() {
         mobileLogoutBtn.onclick = logoutHandler;
       }
 
-      setHelpMenu(true);
-      renderActivationBanner(data.user);
 
       // logged in → no tour click handler needed
       if (tourLink) tourLink.onclick = null;
@@ -605,8 +549,6 @@ async function initAuthUI() {
         mobileLogoutBtn.style.display = "none";
       }
 
-      setHelpMenu(false);
-      renderActivationBanner(null);
 
       if (loginBtn) {
         loginBtn.onclick = () => (window.location.href = "/login");
@@ -640,8 +582,6 @@ async function initAuthUI() {
       loginBtn.onclick = () => (window.location.href = "/login");
     }
 
-    setHelpMenu(false);
-    renderActivationBanner(null);
   }
 }
 

@@ -240,7 +240,7 @@ function applyInsuranceLock(me) {
         e.preventDefault();
         window.requireAccountOrGate({
           title: "Sign in to view insurance",
-          body: "Insurance coverages are available on Core and higher plans.",
+          body: "Insurance coverage access is not enabled for this account.",
           note: "",
           createLabel: "Sign in",
           createHref: "/login",
@@ -265,9 +265,9 @@ function applyInsuranceLock(me) {
       "Upgrade to Pro to view carrier insurance coverages.";
 
     if (upgradeBtn) {
-      upgradeBtn.textContent = "Upgrade your plan";
+      upgradeBtn.textContent = "Open account";
       upgradeBtn.onclick = () => {
-        window.location.href = "/account?tab=plan";
+        window.location.href = "/account";
       };
     }
 
@@ -2826,9 +2826,9 @@ if (emailBtn) {
     if (!canEmailAlerts) {
       return showFeatureGate({
         title: "Email Alerts require Core",
-        body: "Upgrade your plan to enable Email Alerts for carriers.",
-        primaryText: "Upgrade Plan",
-        onPrimary: () => (window.location.href = "/account?tab=plan"),
+        body: "Email Alerts are not enabled for this account.",
+        primaryText: "Open Account",
+        onPrimary: () => (window.location.href = "/account"),
       });
     }
 
@@ -2869,8 +2869,8 @@ if (contractBtn) {
       return showFeatureGate({
         title: "Contracts require Pro",
         body: "Upgrade to Pro to send broker-carrier contracts and track signatures.",
-        primaryText: "Upgrade Plan",
-        onPrimary: () => (window.location.href = "/account?tab=plan"),
+        primaryText: "Open Account",
+        onPrimary: () => (window.location.href = "/account"),
       });
     }
 
@@ -2917,18 +2917,18 @@ if (contractBtn) {
             if (isNoPlanUser(me)) {
               return showFeatureGate({
                 title: "Finish setup to start adding carriers",
-                body: "Your account is ready — you just need to choose a plan to activate Carrier Shark. Plans start at $0 and take less than a minute.",
-                primaryText: "Choose Plan",
-                onPrimary: () => (window.location.href = "/activate-plan"),
+                body: "This account cannot add carriers yet.",
+                primaryText: "Open Account",
+                onPrimary: () => (window.location.href = "/account"),
               });
             }
           
             return showFeatureGate({
               title: "Carrier limit reached",
-              body: "You’ve reached the carrier limit on your current plan. Upgrade to add more carriers.",
+              body: "This account has reached its carrier limit.",
               note: `Current usage: ${count} of ${limit} carriers.`,
-              primaryText: "Upgrade Plan",
-              onPrimary: () => (window.location.href = "/account?tab=plan"),
+              primaryText: "Open Account",
+              onPrimary: () => (window.location.href = "/account"),
             });
           }
       

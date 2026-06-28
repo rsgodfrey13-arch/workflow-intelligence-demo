@@ -64,17 +64,17 @@
         <h1 id="verify-title" class="auth-title">Verify your email to continue.</h1>
         <div id="verify-success-block">
         <p id="verify-subtitle" class="auth-subtitle">
-          We sent a verification link to your inbox. Open it to unlock plan activation.
+          We sent a verification link to your inbox. Open it to finish setup.
         </p>
       
         <a id="continue-btn"
            class="cs-btn cs-btn-primary"
-           href="/activate-plan"
+           href="/account"
            style="display:none;">
-          Continue to choose your plan
+          Continue to your account
         </a>
           <p class="cs-help" style="margin-top:8px; display:none;">
-            You’re all set. Plan activation takes less than a minute.
+            You’re all set. Continue to your account.
           </p>
       </div>
 
@@ -96,9 +96,6 @@
 
           </div>
 
-          <div class="cs-fineprint" style="margin-top:12px;">
-            <span><a href="/support">Need help?</a></span>
-          </div>
         </div>
       </div>
     </section>
@@ -137,7 +134,7 @@ const verifyBox = document.getElementById("verify-box");
     subtitle.classList.remove("auth-title");
     subtitle.classList.add("auth-subtitle");
     subtitle.textContent =
-      "We sent a verification link to your inbox. Open it to unlock plan activation.";
+      "We sent a verification link to your inbox. Open it to finish setup.";
   }
 
   function setStatusMode({ showCard }) {

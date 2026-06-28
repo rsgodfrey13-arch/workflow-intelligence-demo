@@ -180,7 +180,7 @@ router.post("/billing/continue", loadCompanyContext, requireCompanyOwner, async 
     // (This is the key behavior change.)
     if (hasActiveishSub || context === "upgrade") {
       // allow only internal return paths (copying your portal safety pattern)
-      const returnPath = "/account?tab=plan";
+      const returnPath = "/account";
       const portal = await stripe.billingPortal.sessions.create({
         customer: customerId,
         return_url: `${baseUrl}${returnPath}`,
@@ -199,8 +199,8 @@ router.post("/billing/continue", loadCompanyContext, requireCompanyOwner, async 
       mode: "subscription",
       customer: customerId,
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${baseUrl}/account?tab=plan&checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/account?tab=plan&checkout=canceled`,
+      success_url: `${baseUrl}/account?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${baseUrl}/account?checkout=canceled`,
       allow_promotion_codes: true,
       metadata: {
         userId: String(req.session.userId),
@@ -339,8 +339,8 @@ router.post("/billing/checkout", loadCompanyContext, requireCompanyOwner, async 
       mode: "subscription",
       customer: customerId,
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${baseUrl}/account?tab=plan&checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/account?tab=plan&checkout=canceled`,
+      success_url: `${baseUrl}/account?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${baseUrl}/account?checkout=canceled`,
       allow_promotion_codes: true,
       metadata: {
         userId: String(req.session.userId),

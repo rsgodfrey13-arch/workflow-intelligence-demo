@@ -36,12 +36,12 @@ function showLimitGate({ limit, count, noPlan = false }) {
 
     if (noPlan) {
       window.showAccessGate({
-        title: "Finish setup to start adding carriers",
-        body: "Your account is ready — you just need to choose a plan to activate Carrier Shark. Plans start at $0 and take less than a minute.",
-        note: "Choose a plan to activate your workspace and start adding carriers.",
-        createLabel: loggedIn ? "Choose Plan" : "Sign in",
+        title: "Account setup incomplete",
+        body: "This account cannot add carriers yet.",
+        note: "Open your account for details.",
+        createLabel: loggedIn ? "Open account" : "Sign in",
         signInLabel: "Sign in",
-        createHref: loggedIn ? "/activate-plan" : "/login",
+        createHref: loggedIn ? "/account" : "/login",
         signInHref: "/login",
         hideSignIn: true,
       });
@@ -50,11 +50,11 @@ function showLimitGate({ limit, count, noPlan = false }) {
 
     window.showAccessGate({
       title: "Carrier limit reached",
-      body: "You’ve reached the carrier limit on your current plan. Upgrade to add more carriers.",
+      body: "This account has reached its carrier limit.",
       note: `Current usage: ${count} of ${limit} carriers.`,
-      createLabel: loggedIn ? "Upgrade Plan" : "Sign in",
+      createLabel: loggedIn ? "Open account" : "Sign in",
       signInLabel: "Sign in",
-      createHref: loggedIn ? "/account?tab=plan" : "/login",
+      createHref: loggedIn ? "/account" : "/login",
       signInHref: "/login",
       hideSignIn: true,
     });
@@ -62,7 +62,7 @@ function showLimitGate({ limit, count, noPlan = false }) {
   }
 
   alert(noPlan
-    ? "Finish setup to start adding carriers. Choose a plan to activate your account."
+    ? "Account setup is incomplete. Open your account for details."
     : `Carrier limit reached (${count}/${limit}). Upgrade to add more.`);
 }
 
@@ -1395,15 +1395,15 @@ if (skipped > 0) {
     window.showAccessGate({
       title: "Some carriers were skipped",
       body: `${inserted} added. ${skipped} skipped because you're at your carrier limit (${countNow}/${limitNow}).`,
-      note: "Upgrade your plan to add more carriers.",
-      createLabel: loggedIn ? "Upgrade plan" : "Sign in",
+      note: "Open your account for details.",
+      createLabel: loggedIn ? "Open account" : "Sign in",
       signInLabel: "Sign in",
-      createHref: loggedIn ? "/account?tab=plan" : "/login",
+      createHref: loggedIn ? "/account" : "/login",
       signInHref: "/login",
       hideSignIn: true,
     });
   } else {
-    alert(`${inserted} added. ${skipped} skipped due to plan limit.`);
+    alert(`${inserted} added. ${skipped} skipped due to the account limit.`);
   }
 } else {
   // optional: success message if you want
@@ -1955,15 +1955,15 @@ function renderPreviewTable(preview) {
             window.showAccessGate({
               title: "Some carriers were skipped",
               body: `${inserted} added. ${skipped} skipped because you're at your carrier limit (${countNow}/${limitNow}).`,
-              note: "Upgrade your plan to add more carriers.",
-              createLabel: loggedIn ? "Upgrade plan" : "Sign in",
+              note: "Open your account for details.",
+              createLabel: loggedIn ? "Open account" : "Sign in",
               signInLabel: "Sign in",
-              createHref: loggedIn ? "/account?tab=plan" : "/login",
+              createHref: loggedIn ? "/account" : "/login",
               signInHref: "/login",
               hideSignIn: true,
             });
           } else {
-            alert(`${inserted} added. ${skipped} skipped due to plan limit.`);
+            alert(`${inserted} added. ${skipped} skipped due to the account limit.`);
           }
         }
         

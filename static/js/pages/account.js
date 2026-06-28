@@ -13,10 +13,7 @@
     agreements: $("tab-agreements"),
     screening: $("tab-screening"),
     api: $("tab-api"),
-    plan: $("tab-plan"),
     billing: $("tab-billing"),
-    security: $("tab-security"),
-    help: $("tab-help"),
   };
 
   const accountSectionsToggle = $("account-sections-toggle");
@@ -32,7 +29,7 @@ function applyTabAccessByRole(roleRaw) {
   const role = String(roleRaw || "").trim().toUpperCase();
 
   // ✅ what you showed with green checks: only these for non-OWNER
-  const allowedForMember = new Set(["overview", "security"]);
+  const allowedForMember = new Set(["overview"]);
 
   // Owners see everything
   const allowed = (role === "OWNER")
@@ -98,20 +95,7 @@ function renderCancellation({ cancel_at_period_end, current_period_end }) {
   }
 }
   
-function setPlanBadge(planRaw) {
-  const el = document.getElementById("plan-badge");
-  if (!el) return;
 
-  const tier = String(planRaw || "").trim().toLowerCase();
-
-  el.textContent = tier ? tier.toUpperCase() : "—";
-
-  el.classList.add("plan-badge");
-  el.classList.remove("plan-core", "plan-pro", "plan-enterprise");
-
-  const allowed = new Set(["core", "pro", "enterprise"]);
-  if (allowed.has(tier)) el.classList.add(`plan-${tier}`);
-}
 
 
 let activeTab = "overview";
@@ -119,10 +103,7 @@ let activeTab = "overview";
 function setActiveTab(name) {
   if (!panels[name]) return;
 
-  if (name === activeTab) {
-    if (name === "help") loadTickets().catch(console.error);
-    return;
-  }
+  if (name === activeTab) return;
 
   activeTab = name;
 
@@ -134,8 +115,6 @@ function setActiveTab(name) {
     if (!el) return;
     el.classList.toggle("is-active", k === name);
   });
-
-  if (name === "help") loadTickets().catch(console.error);
 
   if (window.matchMedia("(max-width: 920px)").matches) {
     setAccountSectionsOpen(false);
@@ -154,7 +133,7 @@ function setActiveTab(name) {
   if (!requested) return;
 
   // only allow tabs you actually support (prevents typos breaking anything)
-  const allowed = new Set(Object.keys(panels)); // overview, alerts, agreements, api, plan, security, help
+  const allowed = new Set(Object.keys(panels));
   if (!allowed.has(requested)) return;
 
   setActiveTab(requested);
@@ -2091,39 +2070,6 @@ async function createScreeningRuleGroup({ groupName, matchType } = {}) {
 
 
 
-  function renderPlans(plan) {
-    const el = $("plan-grid");
-    if (!el) return;
-
-    const plans = plan?.available || [
-      { id: "starter", name: "Starter", desc: "Lightweight monitoring for small teams." },
-      { id: "pro", name: "Pro", desc: "More watched carriers, faster refresh, richer alerts." },
-      { id: "team", name: "Team", desc: "Multi-user workflows and shared monitoring." },
-    ];
-
-    const current = plan?.current_id;
-
-    el.innerHTML = plans
-      .map((p) => {
-        const active = p.id === current;
-        return `
-          <div class="card" style="padding:14px;">
-            <div class="card-head">
-              <h2 style="font-size:.95rem;">${p.name}</h2>
-              ${active ? `<span class="badge">Current</span>` : ``}
-            </div>
-            <div class="muted" style="margin-top:0;">${p.desc}</div>
-            <div style="margin-top:12px;">
-              <button class="pill-btn ${active ? "pill-btn-secondary" : ""}" data-select-plan="${p.id}">
-                ${active ? "Selected" : "Select"}
-              </button>
-            </div>
-          </div>
-        `;
-      })
-      .join("");
-  }
-
 function getSaveButtons() {
   return [
     document.getElementById("btn-save-alert-fields"),
@@ -2309,16 +2255,6 @@ function applyEmailAlertsLock(user) {
 }
 
 
-function applyBillingLock(user) {
-  const overlay = document.getElementById("billing-locked");
-  if (!overlay) return;
-
-  const plan = String(user?.plan || user?.user?.plan || "").trim().toUpperCase();
-  const billingEnabled = plan !== "STARTER";
-
-  overlay.style.display = billingEnabled ? "none" : "flex";
-}
-
   
 function setAlertsSwitchColor(enabled) {
   const wrap = document.querySelector(".alerts-switch-wrap");
@@ -2362,7 +2298,7 @@ async function loadEmailAlertsEnabled(me) {
   // 2) Make the SWITCH show *something* immediately (default unchecked => red)
   setAlertsSwitchColor(toggle.checked);
 
-  // 3) If plan doesn’t include email alerts, lock it off
+  // 3) If the account does not include email alerts, lock it off
   if (me?.email_alerts !== true) {
     toggle.checked = false;
     toggle.disabled = true;
@@ -2387,130 +2323,6 @@ async function loadEmailAlertsEnabled(me) {
 
 
   
-// -----------------------------
-// Help & Support
-// -----------------------------
-const helpContactEmail = $("help-contact-email");
-const helpContactPhone = $("help-contact-phone");
-const helpSubject = $("help-subject");
-const helpMessage = $("help-message");
-const helpSend = $("btn-help-send");
-const ticketList = $("ticket-list");
-const helpErr = $("help-error");
-const helpOk = $("help-ok");
-
-function setHelpMsg(type, msg){
-  helpErr && (helpErr.style.display = "none");
-  helpOk && (helpOk.style.display = "none");
-
-  if (type === "error" && helpErr) {
-    helpErr.textContent = msg || "Something went wrong.";
-    helpErr.style.display = "block";
-  }
-  if (type === "ok" && helpOk) {
-    helpOk.textContent = msg || "Sent.";
-    helpOk.style.display = "block";
-  }
-}
-
-function updateHelpSendState(){
-  const email = (helpContactEmail?.value || "").trim();
-  const subj  = (helpSubject?.value || "").trim();
-  const msg   = (helpMessage?.value || "").trim();
-
-  const okEmail = email.includes("@") && email.length >= 6;
-  helpSend.disabled = !(okEmail && subj.length >= 3 && msg.length >= 10);
-}
-
-[helpContactEmail, helpContactPhone, helpSubject, helpMessage].forEach((el) => {
-  el?.addEventListener("input", updateHelpSendState);
-});
-
-function renderTickets(tickets){
-  if (!ticketList) return;
-
-  if (!tickets?.length) {
-    ticketList.innerHTML = `<div class="muted">No tickets yet.</div>`;
-    return;
-  }
-
-  ticketList.innerHTML = tickets.map(t => {
-    const id = t.public_id || `CS-${String(t.id).padStart(6, "0")}`;
-    const subj = escapeHtml(t.subject || "—");
-    const when = t.created_at ? new Date(t.created_at).toLocaleString() : "";
-    const status = escapeHtml(t.status || "open");
-    return `
-      <div class="ticket-item">
-        <div class="ticket-top">
-          <div class="ticket-id">${id}</div>
-          <div class="ticket-meta">${status}</div>
-        </div>
-        <div class="ticket-subject">${subj}</div>
-        <div class="ticket-meta">${escapeHtml(when)}</div>
-      </div>
-    `;
-  }).join("");
-}
-
-// simple escape for innerHTML
-function escapeHtml(str){
-  return String(str ?? "")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-}
-
-async function loadTickets(){
-  if (!ticketList) return;
-  ticketList.innerHTML = `<div class="muted">Loading…</div>`;
-
-  const r = await fetch("/api/support/tickets", { credentials: "include" });
-  if (!r.ok) {
-    const text = await r.text().catch(() => "");
-    console.error("GET /api/support/tickets failed:", r.status, text);
-    ticketList.innerHTML = `<div class="muted">Couldn’t load tickets (${r.status}).</div>`;
-    return;
-  }
-  const data = await r.json();
-  renderTickets(data.tickets || []);
-}
-
-helpSend?.addEventListener("click", async () => {
-  const contact_email = (helpContactEmail?.value || "").trim();
-  const contact_phone = (helpContactPhone?.value || "").trim();
-  const subject = (helpSubject?.value || "").trim();
-  const message = (helpMessage?.value || "").trim();
-
-  helpSend.disabled = true;
-  setHelpMsg(null, "");
-
-  try {
-    const r = await fetch("/api/support/tickets", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ contact_email, contact_phone, subject, message }),
-    });
-
-    const data = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error(data.error || "Failed to send.");
-
-    const id = data.public_id || `CS-${String(data.ticket_id).padStart(6, "0")}`;
-    setHelpMsg("ok", `Sent. ${id}`);
-    // clear message only (keep contact info)
-    helpSubject.value = "";
-    helpMessage.value = "";
-    updateHelpSendState();
-    await loadTickets();
-  } catch (e) {
-    console.error(e);
-    setHelpMsg("error", e.message || "Could not send.");
-    updateHelpSendState();
-  }
-});
-
 // API section lock/unlock helpers
 
   function setLocked(rowId, lockedId, locked) {
@@ -2548,161 +2360,6 @@ function setAlertsFooter(checked) {
 }
 
 
-// -----------------------------
-// Plan picker (table version)
-// -----------------------------
-function normalizePlanId(v) {
-  const s = String(v || "").trim().toLowerCase();
-  // if your backend uses different names, map them here.
-  if (s === "core") return "core";
-  if (s === "pro") return "pro";
-  if (s === "enterprise") return "enterprise";
-  return ""; // unknown
-}
-
-
-function initAccountPlanPicker({ currentPlanId, subscriptionStatus }) {
-  const selectedInput = document.getElementById("selected-plan");   // hidden input
-  const continueBtn   = document.getElementById("continue-btn");    // your nice button
-  const helper        = document.getElementById("stripe-helper");
-  const planForm      = document.getElementById("plan-form");       // form wrapper (recommended)
-
-  // If this tab/page doesn't have the table, bail.
-  if (!selectedInput || !continueBtn) return;
-
-  const current = normalizePlanId(currentPlanId);
-
-  const currentBadge = document.getElementById("current-plan-badge");
-  if (currentBadge) {
-    currentBadge.textContent = current ? `Current: ${current.toUpperCase()}` : "Current: —";
-  }
-
-  function setSelected(planId) {
-    const plan = normalizePlanId(planId);
-    if (!plan) return;
-
-    // Don't allow selecting the current plan
-    if (current && plan === current) {
-      selectedInput.value = "";
-      updateUI("");
-      return;
-    }
-
-    selectedInput.value = plan;
-    updateUI(plan);
-  }
-
-  function updateUI(selected) {
-    const plan = normalizePlanId(selected);
-
-    // Highlight selected column (whole body)
-    document.querySelectorAll("[data-plan-col]").forEach((cell) => {
-      cell.classList.toggle("is-selected", plan && cell.dataset.planCol === plan);
-    });
-
-    // Radio dot fill (if your markup uses .plan-radio inside the header)
-    document.querySelectorAll("[data-plan-col] .plan-radio").forEach((dot) => {
-      const col = dot.closest("[data-plan-col]")?.dataset?.planCol;
-      dot.classList.toggle("is-on", plan && col === plan);
-    });
-
-    // Disable current-plan select buttons + show CURRENT label
-    document.querySelectorAll("[data-plan-btn]").forEach((btn) => {
-      const btnPlan = normalizePlanId(btn.dataset.planBtn);
-      const isCurrent = current && btnPlan === current;
-      btn.disabled = !!isCurrent;
-      btn.classList.toggle("is-current", !!isCurrent);
-      btn.textContent = isCurrent ? "CURRENT" : "SELECT";
-    });
-
-    // Continue button state + helper
-    if (!plan) {
-      continueBtn.disabled = true;
-      continueBtn.textContent = "Current Plan";
-      if (helper) helper.style.display = "none";
-      return;
-    }
-
-    continueBtn.disabled = false;
-    continueBtn.textContent = "Finalize upgrade in Stripe →";
-    if (helper) helper.style.display = "block";
-  } // ✅ IMPORTANT: closes updateUI()
-
-  // ✅ Bind events ONCE (not inside updateUI)
-  document.querySelectorAll("[data-plan-col]").forEach((el) => {
-    el.style.cursor = "pointer";
-    el.addEventListener("click", () => setSelected(el.dataset.planCol));
-  });
-
-  document.querySelectorAll("[data-plan-btn]").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setSelected(btn.dataset.planBtn);
-    });
-  });
-
-  // Submit -> upgrade flow:
-  // - Existing subscribers: go straight to Stripe Billing Portal
-  // - New customers: continue through the retained activation page
-  const submitHandler = async (e) => {
-    const plan = normalizePlanId(selectedInput.value);
-    if (!plan) {
-      e.preventDefault();
-      return;
-    }
-
-    const s = String(subscriptionStatus || "").toLowerCase();
-    const isExistingSubscriber = ["active", "trialing", "past_due", "canceled", "unpaid"].includes(s);
-
-    if (isExistingSubscriber) {
-      continueBtn.disabled = true;
-      const oldText = continueBtn.textContent;
-      continueBtn.textContent = "Opening billing…";
-
-      try {
-        const r = await fetch("/api/billing/portal", {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ returnPath: "/account?tab=plan" }),
-        });
-
-        const data = await r.json().catch(() => ({}));
-        if (!r.ok) throw new Error(data?.error || `Portal failed: ${r.status}`);
-        if (!data?.url) throw new Error("Missing portal URL");
-
-        window.location.href = data.url;
-        return;
-      } catch (err) {
-        console.error(err);
-        alert("Could not open billing portal. Try again.");
-        continueBtn.disabled = false;
-        continueBtn.textContent = oldText;
-        return;
-      }
-    }
-
-    // New / not subscribed yet
-    window.location.href = `/activate-plan?plan=${encodeURIComponent(plan)}`;
-  };
-
-  if (planForm) {
-    planForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      submitHandler(e);
-    });
-  } else {
-    continueBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      submitHandler(e);
-    });
-  }
-
-  // Initial state
-  updateUI("");
-}
-  
 function renderCreditsUsage(me) {
   const card = document.getElementById("usage-card");
   if (!card) return;
@@ -2767,7 +2424,6 @@ function renderCreditsUsage(me) {
     if ($("me-name")) $("me-name").textContent = me?.name || me?.user?.name || "—";
     if ($("me-email")) $("me-email").textContent = me?.email || me?.user?.email || "—";
     if ($("me-company")) $("me-company").textContent = me?.company || me?.user?.company || "—";
-    if ($("account-plan")) $("account-plan").textContent = (me?.plan || me?.user?.plan || "—").toUpperCase();
     
     renderCreditsUsage(me);
 
@@ -2786,9 +2442,6 @@ if ($("billing-next-renewal")) {
 }
 
     
-// Billing tab (safe if fields are missing)
-if ($("billing-plan")) $("billing-plan").textContent = me?.plan || me?.user?.plan || "—";
-
 if ($("billing-status")) {
   const s = me?.subscription_status || me?.user?.subscription_status || "—";
   $("billing-status").textContent = String(s).replaceAll("_", " ").toUpperCase();
@@ -2807,13 +2460,6 @@ renderCancellation({
   // Email Alerts feature gate (single overlay)
   applyEmailAlertsLock(me);
     
-    setPlanBadge(me?.plan || me?.user?.plan);
-
-initAccountPlanPicker({
-  currentPlanId: me?.plan || me?.user?.plan,
-  subscriptionStatus: me?.subscription_status || me?.user?.subscription_status
-});
-
     
     setPill("me-email_alerts", me?.email_alerts);
     setPill("me-rest_alerts", me?.rest_alerts);
@@ -2842,10 +2488,6 @@ setDisabled("btn-openapi-spec", docsLocked);
 
 
     
-    // Plan badge: keep it simple for now (no “tier logic”)
-   // const planBadge = $("plan-badge");
-  // if (planBadge) planBadge.textContent = me?.plan || me?.user?.plan || "—";
-
 // Load per-field categories only if the container exists
 if (document.getElementById("email-alert-fields")) {
   await loadEmailAlertFields();
@@ -2893,15 +2535,8 @@ if (document.getElementById("email-alert-fields")) {
       }
 
 
-    // 4) Plan grid (only if you kept that section)
-    if ($("plan-grid")) {
-      const plan = await apiGet("/api/user/plan");
-      renderPlans(plan);
-    }
-
     // Email Alerts feature gate (single overlay)
     applyEmailAlertsLock(me);
-    applyBillingLock(me);
     await loadEmailAlertsEnabled(me);
     
   }
@@ -3046,7 +2681,7 @@ $("btn-save-webhook")?.addEventListener("click", async () => {
 $("btn-copy-key")?.addEventListener("click", async () => {
   try {
     if (!API_KEY_FULL) {
-      alert("For security, the full key is only shown right after rotation. Click Rotate to generate a new one.");
+      alert("The full key is only shown right after rotation. Click Rotate to generate a new one.");
       return;
     }
 
@@ -3083,88 +2718,6 @@ $("btn-openapi-spec")?.addEventListener("click", () => {
 });
 
   
-// -----------------------------
-// Change Password Modal
-// -----------------------------
-const pwModal = $("pw-modal");
-const pwClose = $("pw-close");
-const pwCancel = $("pw-cancel");
-const pwSave = $("pw-save");
-const pwErr = $("pw-error");
-const pwOk = $("pw-ok");
-
-const pwCurrent = $("pw-current");
-const pwNew = $("pw-new");
-const pwConfirm = $("pw-confirm");
-
-function openPwModal() {
-  if (!pwModal) return;
-  pwErr.style.display = "none";
-  pwOk.style.display = "none";
-  pwErr.textContent = "";
-  pwOk.textContent = "";
-  pwCurrent.value = "";
-  pwNew.value = "";
-  pwConfirm.value = "";
-  pwSave.disabled = false;
-
-  pwModal.classList.add("is-open");
-  pwModal.setAttribute("aria-hidden", "false");
-  setTimeout(() => pwCurrent?.focus(), 0);
-}
-
-function closePwModal() {
-  if (!pwModal) return;
-  pwModal.classList.remove("is-open");
-  pwModal.setAttribute("aria-hidden", "true");
-}
-
-function showPwError(msg) {
-  pwOk.style.display = "none";
-  pwErr.textContent = msg || "Something went wrong.";
-  pwErr.style.display = "block";
-}
-
-function showPwOk(msg) {
-  pwErr.style.display = "none";
-  pwOk.textContent = msg || "Password updated.";
-  pwOk.style.display = "block";
-}
-
-$("btn-change-password")?.addEventListener("click", openPwModal);
-
-pwClose?.addEventListener("click", closePwModal);
-pwCancel?.addEventListener("click", closePwModal);
-pwModal?.addEventListener("click", (e) => {
-  if (e.target === pwModal) closePwModal();
-});
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && pwModal?.classList.contains("is-open")) closePwModal();
-});
-
-pwSave?.addEventListener("click", async () => {
-  const currentPassword = pwCurrent.value || "";
-  const newPassword = pwNew.value || "";
-  const confirm = pwConfirm.value || "";
-
-  if (!currentPassword) return showPwError("Enter your current password.");
-  if (newPassword.length < 8) return showPwError("New password must be at least 8 characters.");
-  if (newPassword !== confirm) return showPwError("New passwords do not match.");
-
-  pwSave.disabled = true;
-
-  try {
-    await apiPost("/api/change-password", { currentPassword, newPassword });
-    showPwOk("Password updated.");
-    setTimeout(closePwModal, 700);
-  } catch (err) {
-    showPwError("Could not update password. Check your current password and try again.");
-    pwSave.disabled = false;
-  }
-});
-
-
-
   loadEverything()
   .then(() => {
     wireAgreementUploadModalOnce();
@@ -3172,11 +2725,6 @@ pwSave?.addEventListener("click", async () => {
 wireScreeningRuleGroupModalOnce();
 wireScreeningRuleGroupRenameModalOnce();
 wireScreeningRuleGroupAssignModalOnce();
-  })
-  .then(() => {
-    if (activeTab === "help") {
-      loadTickets().catch(console.error);
-    }
   })
   .catch((err) => console.error(err));
 })();
