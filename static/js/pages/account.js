@@ -10,10 +10,7 @@
     overview: $("tab-overview"),
     team: $("tab-team"),
     alerts: $("tab-alerts"),
-    agreements: $("tab-agreements"),
     screening: $("tab-screening"),
-    api: $("tab-api"),
-    billing: $("tab-billing"),
   };
 
   const accountSectionsToggle = $("account-sections-toggle");

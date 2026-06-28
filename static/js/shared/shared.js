@@ -473,7 +473,7 @@ async function initAuthUI() {
 
       if (accountLink) {
         accountLink.style.display = DESKTOP_AUTH_DISPLAY;
-        accountLink.textContent = "My Account";
+        accountLink.textContent = "User Settings";
         accountLink.href = "/account";
       }
 
@@ -489,7 +489,7 @@ async function initAuthUI() {
 
       if (mobileAccountLink) {
         mobileAccountLink.style.display = "flex";
-        mobileAccountLink.textContent = "My Account";
+        mobileAccountLink.textContent = "User Settings";
         mobileAccountLink.href = "/account";
       }
 
@@ -525,7 +525,7 @@ async function initAuthUI() {
 
       if (accountLink) {
         accountLink.style.display = "none";
-        accountLink.textContent = "My Account";
+        accountLink.textContent = "User Settings";
         accountLink.href = "/login";
       }
 

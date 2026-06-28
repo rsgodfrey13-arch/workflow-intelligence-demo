@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Account</title>
+    <title>User Settings</title>
 <link rel="stylesheet" href="/static/css/base.css">
 <link rel="stylesheet" href="/static/css/profile_style.css">
 <link rel="stylesheet" href="/static/css/account.css">
@@ -22,8 +22,8 @@
 
     <header class="account-header cs-page-header">
       <div>
-        <h1 class="page-title">My Account</h1>
-        <p class="page-subtitle">Manage alerts, agreements, billing, and API access.</p>
+        <h1 class="page-title">User Settings</h1>
+        <p class="page-subtitle">Manage your profile, teammates, alerts, and screening preferences.</p>
       </div>
 
       <div class="account-header-actions action-bar">
@@ -39,7 +39,7 @@
         aria-expanded="false"
         aria-controls="account-sections-panel"
       >
-        <span>Account Sections</span>
+        <span>Settings Sections</span>
         <span class="account-mobile-toggle-icon" aria-hidden="true">▾</span>
       </button>
 
@@ -56,21 +56,9 @@
           <span class="rail-dot"></span>
           Email Alerts
         </button>
-        <button class="rail-item" data-tab="agreements">
-          <span class="rail-dot"></span>
-          Agreements
-        </button>
         <button class="rail-item" data-tab="screening">
           <span class="rail-dot"></span>
           Screening
-        </button>
-        <button class="rail-item" data-tab="api">
-          <span class="rail-dot"></span>
-          API
-        </button>
-        <button class="rail-item" data-tab="billing">
-          <span class="rail-dot"></span>
-          Billing
         </button>
       </div>
     </div>
@@ -90,21 +78,9 @@
           <span class="rail-dot"></span>
           Email Alerts
         </button>
-        <button class="rail-item" data-tab="agreements">
-          <span class="rail-dot"></span>
-          Agreements
-        </button>
         <button class="rail-item" data-tab="screening">
           <span class="rail-dot"></span>
           Screening
-        </button>
-        <button class="rail-item" data-tab="api">
-          <span class="rail-dot"></span>
-          API
-        </button>
-        <button class="rail-item" data-tab="billing">
-          <span class="rail-dot"></span>
-          Billing
         </button>
       </aside>
 
@@ -298,35 +274,6 @@
           </div>
         </section>
 
-        <!-- AGREEMENTS -->
-        <section class="tab-panel" id="tab-agreements">
-          <div class="card">
-            <div class="card-head card-header">
-              <h2>Agreements</h2>
-              <p class="muted">Pick your default agreement and manage templates.</p>
-            </div>
-
-            <div class="row save-row save-row--inline">
-              <div class="save-row__actions save-row__actions--wrap">
-                <button class="btn-primary" id="btn-upload-agreement">Upload Agreement</button>
-                <button class="btn-primary" id="btn-set-default">Set default</button>
-                <button class="btn-primary" id="btn-save-agreement-requirements" disabled>Save requirements</button>
-                <span id="agreements-save-status" class="save-status" aria-live="polite"></span>
-              </div>
-            </div>
-
-            <div id="agreement-requirements" class="toggle-grid" style="margin-top:10px; margin-bottom:4px;"></div>
-
-            <div class="divider"></div>
-
-            <div class="agreements-grid" id="agreements-grid">
-              <div class="muted">Loading…</div>
-            </div>
-            
-          </div>
-        </section>
-
-
         <!-- SCREENING -->
         <section class="tab-panel" id="tab-screening">
           <div class="card">
@@ -395,222 +342,8 @@
           </div>
         </section>
 
-        <!-- API -->
-        <section class="tab-panel" id="tab-api">
-          <div class="card">
-            <div class="card-head card-header">
-              <h2>API</h2>
-              <p class="muted">Everything you need to integrate Carrier Shark into your workflow.</p>
-            </div>
-
-            <div class="row lock-wrap" id="api-key-row">
-              <div class="lock-main">
-                <div class="row-title">API Key</div>
-                <div class="row-sub" id="api-key-masked">—</div>
-              </div>
-            
-              <div class="row-actions">
-                <button class="btn-ghost" id="btn-copy-key">Copy</button>
-                <button class="btn-primary" id="btn-rotate-key">Rotate</button>
-              </div>
-            
-              <div class="lock-footer" id="api-key-locked" style="display:none;">
-                <span class="lock-dot"></span>
-                <span>
-                  API access is not enabled for this account.
-                </span>
-              </div>
-            </div>
-            
-            <div class="divider"></div>
-            
-            <div class="row lock-wrap" id="webhook-row">
-              <div class="lock-main">
-                <div class="row-title">Webhook URL</div>
-                <input
-                  id="webhook-url"
-                  type="url"
-                  class="api-input"
-                  placeholder="https://example.com/webhooks/carrier-shark"
-                />
-              </div>
-            
-              <div class="row-actions">
-                <button class="btn-ghost" id="btn-save-webhook" disabled>
-                  Save
-                </button>
-              </div>
-            
-              <div class="lock-footer" id="webhook-locked" style="display:none;">
-                <span class="lock-dot"></span>
-                <span>
-                  Webhooks are not enabled for this account.
-                </span>
-              </div>
-            </div>
-            
-            <div class="divider"></div>
-            
-            <div class="row lock-wrap" id="docs-row">
-              <div class="lock-main">
-                <div class="row-title">Documentation</div>
-                <div class="row-sub">
-                  Auth, endpoints, examples, error formats.
-                </div>
-              </div>
-            
-              <div class="row-actions">
-                <button class="btn-primary" id="btn-openapi-spec">
-                  Open API spec
-                </button>
-              </div>
-            
-            </div>
-
-            </div> 
-            </section> 
-
-<!-- BILLING -->
-<section class="tab-panel" id="tab-billing">
-  <div class="card">
-    <div class="card-head">
-      <h2>Billing</h2>
-      <p class="muted">Manage payment method, invoices, and subscription settings.</p>
-    </div>
-
-    <div class="kv-grid">
-      <div class="kv">
-        <div class="kv-label">Status</div>
-        <div class="kv-value" id="billing-status">—</div>
-      </div>
-
-      <div class="kv">
-        <div class="kv-label">Next renewal</div>
-        <div class="kv-value" id="billing-next-renewal">—</div>
-      </div>
-
-      <div class="kv" id="billing-cancel-row" style="display:none;">
-        <div class="kv-label">Subscription ending</div>
-        <div class="kv-value">
-          <span id="billing-cancel-text" class="billing-ending-text"></span>
-        </div>
-      </div>
-    </div>
-
-    <div class="divider"></div>
-
-    <div class="row">
-      <div class="row-main">
-        <div class="row-title">Manage billing in Stripe</div>
-        <div class="row-sub">
-          Update card, download invoices, cancel, or change billing details.
-        </div>
-      </div>
-
-      <div class="row-actions">
-        <button class="btn-primary" id="btn-manage-billing">
-          Manage billing
-        </button>
-      </div>
-    </div>
-
-    <div class="muted" style="margin-top:12px;">
-      Payments are processed by Stripe. We never store card details.
-    </div>
-  </div>
-</section>
-        
       </main>
     </div>
-</div>
-
-<div id="agreement-upload-modal" class="cs-modal-backdrop" hidden>
-  <div class="cs-modal glass-card" role="dialog" aria-modal="true" aria-labelledby="agreement-upload-title">
-    <div class="cs-modal-header">
-      <div class="cs-modal-headings">
-        <div id="agreement-upload-title" class="cs-modal-title">Upload Master Agreement</div>
-        <div class="cs-modal-subtitle">Upload a reusable master agreement PDF for your account’s contract workflow.</div>
-      </div>
-      <button id="agreement-upload-close" class="cs-modal-x" type="button" aria-label="Close">×</button>
-    </div>
-
-    <form id="agreement-upload-form" class="cs-modal-body docs-upload-form">
-      <div class="cs-row cs-row-col">
-        <label class="cs-label" for="agreement-upload-name">Agreement Name</label>
-        <input
-          id="agreement-upload-name"
-          class="cs-input"
-          type="text"
-          maxlength="120"
-          autocomplete="off"
-          placeholder="e.g., 2026 Master Carrier Agreement"
-        >
-        <div class="cs-hint">Optional · leave blank to use a clean filename-based title.</div>
-      </div>
-
-      <div class="cs-divider"></div>
-
-      <div class="cs-row cs-row-col">
-        <label class="cs-label" for="agreement-upload-file">Agreement PDF</label>
-
-        <label class="agreement-file-picker" id="agreement-file-picker" for="agreement-upload-file">
-          <input
-            id="agreement-upload-file"
-            class="agreement-file-input"
-            type="file"
-            accept=".pdf,application/pdf"
-            required
-          >
-
-          <div class="agreement-file-picker-main">
-            <span class="agreement-file-pill" id="agreement-file-pill">Choose PDF</span>
-            <span class="agreement-file-name" id="agreement-file-name">No file selected</span>
-          </div>
-
-          <div class="cs-hint">PDF only. Max file size 15MB.</div>
-        </label>
-      </div>
-
-      <div id="agreement-upload-error" class="docs-upload-error" hidden></div>
-    </form>
-
-    <div class="cs-modal-footer">
-      <div class="cs-footer-left">
-        <div class="cs-hint">PDF only • up to 5 agreements per account</div>
-      </div>
-      <div class="cs-footer-right">
-        <button id="agreement-upload-cancel" class="cs-btn cs-btn-ghost" type="button">Cancel</button>
-        <button id="agreement-upload-submit" class="cs-btn cs-btn-primary" type="button">Upload Agreement</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div id="agreement-delete-modal" class="cs-modal-backdrop" hidden>
-  <div class="cs-modal glass-card" role="dialog" aria-modal="true" aria-labelledby="agreement-delete-title">
-    <div class="cs-modal-header">
-      <div class="cs-modal-headings">
-        <div id="agreement-delete-title" class="cs-modal-title">Delete Agreement</div>
-        <div class="cs-modal-subtitle">Are you sure you want to remove this agreement from your template library?<br>Existing signed/sent contracts will not be affected.</div>
-      </div>
-      <button id="agreement-delete-close" class="cs-modal-x" type="button" aria-label="Close">×</button>
-    </div>
-
-    <div class="cs-modal-body">
-      <div class="cs-row cs-row-col">
-        <div class="cs-label">Agreement Name</div>
-        <div id="agreement-delete-target" class="agreement-delete-target" role="status" aria-live="polite"></div>
-      </div>
-      <div id="agreement-delete-error" class="docs-upload-error" hidden></div>
-    </div>
-
-    <div class="cs-modal-footer">
-      <div class="cs-footer-right">
-        <button id="agreement-delete-cancel" class="cs-btn cs-btn-ghost" type="button">Cancel</button>
-        <button id="agreement-delete-confirm" class="cs-btn cs-btn-primary agreement-delete-confirm-btn" type="button">Delete Agreement</button>
-      </div>
-    </div>
-  </div>
 </div>
 
 <div id="screening-group-modal" class="cs-modal-backdrop" hidden>

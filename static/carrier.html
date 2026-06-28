@@ -160,14 +160,6 @@
       <!-- ACTION BUTTONS, SEPARATE ROW -->
       <div class="carrier-actions">
         
-        <!-- NEW: Send Contract -->
-        <div class="contract-action-wrap">
-          <button id="btn-send-contract" class="pill-btn pill-contract pill-disabled" type="button">
-            Send Contract
-          </button>
-          <div id="contract-sign-status" class="contract-sign-status" hidden></div>
-        </div>
-        
         <button id="btn-add-carrier" class="pill-btn pill-add">+ Add Carrier</button>
         <button id="btn-remove-carrier" class="pill-btn pill-remove pill-disabled">Remove Carrier</button>
       </div>
@@ -180,36 +172,10 @@
       <button type="button" class="quick-jump-link is-active" data-jump="carrier-header">Summary</button>
       <button type="button" class="quick-jump-link" data-jump="section-safety">Safety</button>
       <button type="button" class="quick-jump-link" data-jump="section-inspections">Inspections</button>
-      <button type="button" class="quick-jump-link" data-jump="ins-coverages-card">Insurance</button>
       <button type="button" class="quick-jump-link" data-jump="carrier-documents">Documents</button>
     </nav>
   <div class="hero-accent-line"></div>
 
-  <section id="carrier-agreements" class="carrier-agreements glass-card" hidden>
-    <div class="carrier-docs-header">
-      <div class="agreements-left">
-        <div class="agreements-kicker">Agreements</div>
-        <div id="agreements-status" class="agreements-status">No signed agreements yet</div>
-      </div>
-      <div id="agreements-summary-meta" class="docs-summary-meta"></div>
-    </div>
-
-    <div id="agreements-table-wrap" class="docs-table-wrap">
-      <table class="docs-table" aria-label="Carrier agreements">
-        <thead>
-          <tr>
-            <th>Agreement</th>
-            <th>Signed Date</th>
-            <th>Document</th>
-            <th>Certificate</th>
-          </tr>
-        </thead>
-        <tbody id="agreements-table-body"></tbody>
-      </table>
-      <div id="agreements-mobile-list" class="docs-mobile-list" aria-label="Carrier agreements mobile"></div>
-      <div id="agreements-empty" class="docs-empty">No signed agreements yet.</div>
-    </div>
-  </section>
   
 </section>
 
@@ -409,40 +375,6 @@
       </article>
 
 
-<!-- Insurance Coverages -->
-<article class="info-card glass-card" id="ins-coverages-card">
-  <div class="card-header">
-    <h2>Insurance Coverages</h2>
-    <div class="ins-coverages-header-actions">
-      <button
-        id="btn-raise-insurance-document-review"
-        class="ins-raise-doc-review-btn"
-        type="button"
-        hidden
-      >
-        Raise Document Exception
-      </button>
-      <span class="card-tag">COI</span>
-    </div>
-  </div>
-
-    <!-- NEW: Insurance lock overlay -->
-<div class="alerts-lock-overlay" id="insurance-locked" style="display:none;">
-  <div class="alerts-lock-content">
-    <div class="alerts-lock-title" id="insurance-lock-title">Insurance access isn’t enabled</div>
-    <div class="alerts-lock-sub" id="insurance-lock-body">
-      Insurance coverage access is not enabled for this account.
-    </div>
-    <button class="btn-primary" type="button" id="btn-upgrade-insurance">
-      Open account
-    </button>
-  </div>
-</div>
-
-  <div id="ins-coverages-body" class="ins-coverages-body">
-    <div class="cs-hint">Loading…</div>
-  </div>
-</article>
       
       
       <!-- 
@@ -671,48 +603,6 @@
   </div>
 </div>
 
-<div id="insurance-delete-confirm-modal" class="cs-modal-backdrop" hidden>
-  <div class="cs-modal glass-card screening-remove-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="insurance-delete-confirm-title">
-    <div class="cs-modal-header">
-      <div class="cs-modal-headings">
-        <div id="insurance-delete-confirm-title" class="cs-modal-title">Delete Coverage</div>
-      </div>
-      <button id="insurance-delete-confirm-close" class="cs-modal-x" type="button" aria-label="Close">×</button>
-    </div>
-    <div class="cs-modal-body">
-      <p>Delete this coverage and related normalization records? This cannot be undone.</p>
-      <div id="insurance-delete-confirm-error" class="cs-hint" hidden></div>
-    </div>
-    <div class="cs-modal-footer">
-      <button id="insurance-delete-confirm-cancel" class="cs-btn cs-btn-ghost" type="button">Cancel</button>
-      <button id="insurance-delete-confirm-confirm" class="cs-btn cs-btn-danger" type="button">Delete Coverage</button>
-    </div>
-  </div>
-</div>
-
-<div id="insurance-document-review-modal" class="cs-modal-backdrop" hidden>
-  <div class="cs-modal glass-card screening-remove-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="insurance-document-review-title">
-    <div class="cs-modal-header">
-      <div class="cs-modal-headings">
-        <div id="insurance-document-review-title" class="cs-modal-title">Raise Document Exception</div>
-      </div>
-      <button id="insurance-document-review-close" class="cs-modal-x" type="button" aria-label="Close">×</button>
-    </div>
-    <div class="cs-modal-body">
-      <p>
-        Escalate this carrier’s insurance document to document review for follow-up.
-        Existing coverage rows will remain unchanged.
-      </p>
-      <div id="insurance-document-review-success" class="cs-hint insurance-document-review-success" hidden></div>
-      <div id="insurance-document-review-error" class="cs-hint" hidden></div>
-    </div>
-    <div class="cs-modal-footer">
-      <button id="insurance-document-review-cancel" class="cs-btn cs-btn-ghost" type="button">Cancel</button>
-      <button id="insurance-document-review-confirm" class="cs-btn cs-btn-primary" type="button">Raise Exception</button>
-    </div>
-  </div>
-</div>
-
 <div id="add-document-modal" class="cs-modal-backdrop" hidden>
   <div class="cs-modal glass-card" role="dialog" aria-modal="true" aria-labelledby="add-document-title">
     <div class="cs-modal-header">
@@ -811,98 +701,6 @@
   </div>
 </div>
 
- <!-- Contract Sent Modal --> 
-<div id="contractSuccessModal" class="contract-success-modal hidden" aria-hidden="true">
-  <div class="contract-success-backdrop"></div>
-  <div class="contract-success-card" role="dialog" aria-modal="true" aria-labelledby="contractSuccessTitle">
-    <button class="contract-success-close" id="contractSuccessClose" aria-label="Close">×</button>
-    <div class="contract-success-icon">✓</div>
-    <h3 id="contractSuccessTitle">Contract Sent</h3>
-    <p>The contract was successfully sent to the carrier.</p>
-    <div class="contract-success-actions">
-      <button class="cs-btn cs-btn-primary" id="contractSuccessOk" type="button">Got it</button>
-    </div>
-  </div>
-</div>
-
-<!-- Send Contract Modal -->
-<div id="send-contract-modal" class="cs-modal-backdrop" hidden>
-  <div class="cs-modal glass-card" role="dialog" aria-modal="true" aria-labelledby="send-contract-title">
-
-    <div class="cs-modal-header">
-      <div class="cs-modal-headings">
-        <div id="send-contract-title" class="cs-modal-title">Send Contract</div>
-        <div class="cs-modal-subtitle">Send a contract to this carrier’s FMCSA contact and any additional recipients.</div>
-      </div>
-
-      <button id="send-contract-close" class="cs-modal-x" type="button" aria-label="Close">×</button>
-    </div>
-
-    <div class="cs-modal-body">
-
-      <!-- Contract template -->
-      <div class="cs-row cs-row-col">
-        <div class="cs-label">Contract Template</div>
-        <div class="cs-hint">Choose which contract version to send.</div>
-
-        <select id="send-contract-template" class="cs-input" style="width:100%;">
-          <option value="">Loading…</option>
-        </select>
-      </div>
-
-      <div class="cs-divider"></div>
-
-      <!-- Default recipient (locked) -->
-      <div class="cs-row cs-row-col">
-        <div class="cs-label">FMCSA Contact</div>
-        <div class="cs-hint">This is the carrier contact email on file with FMCSA (can’t be removed).</div>
-
-        <div id="send-contract-default-chip" class="cs-chips"></div>
-      </div>
-
-      <div class="cs-divider"></div>
-
-      <!-- Additional recipients -->
-      <div class="cs-row cs-row-col">
-        <div class="cs-label">Additional Recipients</div>
-
-        <div id="send-contract-chips" class="cs-chips"></div>
-
-        <div class="cs-inline">
-          <input id="send-contract-input" class="cs-input" type="email" placeholder="Add an email (name@company.com)">
-          <button id="send-contract-add" class="cs-btn cs-btn-ghost" type="button">Add</button>
-        </div>
-      </div>
-
-    </div>
-
-    <div class="cs-modal-footer">
-      <div class="cs-footer-left">
-        <a class="cs-btn cs-btn-manage" href="/account?tab=agreements">
-          Manage Contract Settings
-          <span class="cs-btn-arrow">→</span>
-        </a>
-      </div>
-
-      <div class="cs-footer-right">
-        <button id="send-contract-cancel" class="cs-btn cs-btn-ghost" type="button">Cancel</button>
-        <button id="send-contract-send" class="cs-btn cs-btn-primary" type="button">Send</button>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-  <button
-    id="back-to-overview"
-    class="back-to-overview"
-    aria-label="Back to overview"
-  >
-    Back to top <span class="arrow">↑</span>
-  </button>
-
-
-  <!-- 1. Load Sentry library -->
   <script
     src="https://js.sentry-cdn.com/1df77c56ba17c2098baf02e362c93be2.min.js"
     crossorigin="anonymous"

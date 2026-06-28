@@ -2291,9 +2291,6 @@ if (data && data.source === "cache_stale") {
       }
 
       const me = await getMe();
-      showAdminInsuranceActions = isCompanyAdminUser(me);
-      updateInsuranceDocumentReviewButtonVisibility();
-      applyInsuranceLock(me);
       if (me) {
         await loadDefaultScreeningResult(dot);
       } else {
@@ -2303,15 +2300,6 @@ if (data && data.source === "cache_stale") {
         if (screeningCard) screeningCard.hidden = true;
       }
       
-      // Only load insurance if unlocked (optional)
-      if (me?.view_insurance === true) {
-        await loadInsuranceCoverages(dot);
-      } else {
-      const wrap = document.getElementById("ins-coverages-body");
-      if (wrap) wrap.innerHTML = `<div class="cs-hint">—</div>`;
-    }
-      
-      await loadCarrierAgreements(dot);
       await loadCarrierDocuments(dot);
       if (opts.manual === true) {
         setRefreshUi("idle", "Updated just now");
@@ -3068,12 +3056,9 @@ if (contractBtn) {
   // Run ONCE
 document.addEventListener("DOMContentLoaded", () => {
   wireEmailModalOnce();
-  wireSendContractModalOnce(); 
   wireAddDocumentModalOnce();
   wireScreeningModalOnce();
   wireOverrideModalOnce();
-  wireInsuranceDeleteModalOnce();
-  wireInsuranceDocumentReviewModalOnce();
   wireQuickJump();
   wireBackToOverview();
   document.getElementById("btn-refresh-carrier")?.addEventListener("click", () => {
