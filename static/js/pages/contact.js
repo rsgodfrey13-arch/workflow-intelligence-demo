@@ -1,8 +1,5 @@
 // contact.js
 (() => {
-  // If you already have a shared loader for header/footer, keep using it.
-  // loadHeader(); loadFooter();
-
   const form = document.getElementById("contact-form");
   const statusEl = document.getElementById("contact-status");
 
@@ -72,14 +69,14 @@
       if (ref) {
         showStatus("ok", `Message sent. Reference: ${ref}`);
       } else {
-        showStatus("ok", "Message sent. We’ll reply within 1 business day.");
+        showStatus("ok", "Message sent.");
       }
 
       form.reset();
     } catch (err) {
       showStatus(
         "err",
-        err?.message || "Something didn’t send. Email us at support@carriershark.com."
+        err?.message || "Something didn’t send. Please try again."
       );
     } finally {
       setSubmitting(false);

@@ -240,7 +240,7 @@ async function sendContractAcceptedEmails({
   if (uniqueCarrier.length) {
     await sendCarrierContractAcceptedEmail({
       to: uniqueCarrier,
-      broker_name: meta.broker_name || "Carrier Shark Customer",
+      broker_name: meta.broker_name || "Project Customer",
       carrier_name: meta.carrier_name || "",
       dotnumber: meta.dotnumber ? String(meta.dotnumber) : "",
       agreement_type: meta.agreement_type || "Carrier Agreement",
@@ -252,7 +252,7 @@ async function sendContractAcceptedEmails({
   if (meta.broker_email) {
     await sendBrokerContractAcceptedEmail({
       to: String(meta.broker_email).trim().toLowerCase(),
-      broker_name: meta.broker_name || "Carrier Shark Customer",
+      broker_name: meta.broker_name || "Project Customer",
       carrier_name: meta.carrier_name || "",
       dotnumber: meta.dotnumber ? String(meta.dotnumber) : "",
       agreement_type: meta.agreement_type || "Carrier Agreement",
@@ -410,7 +410,7 @@ router.get("/contract/:token/certificate", async (req, res) => {
   <div class="wrap">
     <div class="h">Signature Certificate</div>
     <div class="sub">
-      This certificate records the electronic acceptance of an agreement delivered via Carrier Shark.
+      This certificate records the electronic acceptance of an agreement delivered via Project.
       ${accepted ? `<span class="badge">Accepted</span>` : `<span class="badge">Not yet accepted</span>`}
     </div>
 
@@ -480,7 +480,7 @@ router.get("/contract/:token/certificate", async (req, res) => {
 
     <div class="box">
       <div class="muted">
-        Carrier Shark provides technology for delivery and electronic acceptance and is not a party to the agreement.
+        Project provides technology for delivery and electronic acceptance and is not a party to the agreement.
         Parties are responsible for verifying identity and authority.
       </div>
     </div>
@@ -803,7 +803,7 @@ router.get("/contract/:token", async (req, res) => {
 <body>
   <div class="wrap">
     <div class="top">
-      <div class="brand">Carrier Shark — Carrier Agreement</div>
+      <div class="brand">Project — Carrier Agreement</div>
       <a class="btn" href="${pdfUrl}" target="_blank" rel="noopener">Open PDF</a>
     </div>
 
@@ -829,9 +829,9 @@ router.get("/contract/:token", async (req, res) => {
 <div class="card" style="margin-top:14px; background: rgba(255,255,255,0.04);">
   <div style="font-size:13px; line-height:1.5;">
     <strong>Platform Notice:</strong><br/>
-    Carrier Shark provides technology for document delivery and electronic acceptance.
-    Carrier Shark is <strong>not a party</strong> to this agreement and assumes no obligations under it.
-    Carrier Shark does not verify identity, authority, insurance coverage, or regulatory status of any party.
+    Project provides technology for document delivery and electronic acceptance.
+    Project is <strong>not a party</strong> to this agreement and assumes no obligations under it.
+    Project does not verify identity, authority, insurance coverage, or regulatory status of any party.
     Users are responsible for independent verification.
   </div>
 </div>

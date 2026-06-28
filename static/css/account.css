@@ -2243,7 +2243,7 @@ body.account-page .api-input{
   }
 }
 
-/* Agreements modals + tile actions (Carrier Shark modal parity) */
+/* Modal and tile action styles */
 #agreement-upload-modal,
 #agreement-delete-modal{
   position: fixed;

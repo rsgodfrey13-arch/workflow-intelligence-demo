@@ -448,8 +448,6 @@ async function initAuthUI() {
   const logoutBtn = document.getElementById("logout-btn");
   const accountLink = document.getElementById("account-link");
   const mobileAccountLink = document.getElementById("mobile-account-link");
-  const apiLink = document.getElementById("api-link");
-  const mobileApiLink = document.getElementById("mobile-api-link");
   const mobileLogoutBtn = document.getElementById("mobile-logout-btn");
   const header = document.querySelector(".site-header");
   const tourLink = document.getElementById("tour-link");
@@ -474,13 +472,6 @@ async function initAuthUI() {
         accountLink.style.display = DESKTOP_AUTH_DISPLAY;
         accountLink.textContent = "User Settings";
         accountLink.href = "/account";
-      }
-
-      if (apiLink) {
-        apiLink.style.display = "none";
-      }
-      if (mobileApiLink) {
-        mobileApiLink.style.display = "none";
       }
 
       if (mobileAccountLink) {
@@ -525,13 +516,6 @@ async function initAuthUI() {
         accountLink.href = "/login";
       }
 
-      if (apiLink) {
-        apiLink.style.display = DESKTOP_AUTH_DISPLAY;
-      }
-      if (mobileApiLink) {
-        mobileApiLink.style.display = "flex";
-      }
-
       if (mobileAccountLink) {
         mobileAccountLink.style.display = "flex";
         mobileAccountLink.textContent = "Login";
@@ -561,8 +545,6 @@ async function initAuthUI() {
     if (logoutBtn) logoutBtn.style.display = "none";
     if (tourLink) tourLink.style.display = DESKTOP_AUTH_DISPLAY;
     if (accountLink) accountLink.style.display = "none";
-    if (apiLink) apiLink.style.display = DESKTOP_AUTH_DISPLAY;
-    if (mobileApiLink) mobileApiLink.style.display = "flex";
     if (mobileAccountLink) {
       mobileAccountLink.style.display = "flex";
       mobileAccountLink.textContent = "Login";
@@ -597,36 +579,6 @@ async function initAccountLink() {
   }
 }
 
-async function loadFooter() {
-  const container = document.getElementById("site-footer");
-  if (!container) return;
-
-  try {
-    const res = await fetch("/partials/footer.html", { cache: "no-store" });
-    if (!res.ok) throw new Error("Failed to load footer.html");
-
-    container.innerHTML = await res.text();
-
-// Wire footer Tour link (opens modal)
-const ft = document.querySelector(".footer-tour-link");
-if (ft) {
-  ft.addEventListener("click", (e) => {
-    e.preventDefault();
-    localStorage.removeItem("cs_tour_seen_v1");
-    if (typeof window.openTour === "function") window.openTour();
-  });
-}
-
-    // Auto year (safe to run after injection)
-    const y = new Date().getFullYear();
-    const yearEl = document.getElementById("footer-year");
-    if (yearEl) yearEl.textContent = y;
-
-  } catch (err) {
-    console.error("Footer load failed:", err);
-  }
-}
-
 document.addEventListener("DOMContentLoaded", async () => {
   trackHomepageView();
 
@@ -639,5 +591,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadHeader();
   }
 
-  await loadFooter();
 });

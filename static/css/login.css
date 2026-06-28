@@ -162,7 +162,7 @@ html, body { margin: 0; padding: 0; }
 
 .login-meta .create-link {
   margin-left: 6px;
-  color: #38bdf8; /* your Carrier Shark blue */
+  color: #38bdf8;
   text-decoration: none;
   font-weight: 500;
 }

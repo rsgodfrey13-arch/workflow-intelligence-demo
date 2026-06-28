@@ -164,7 +164,7 @@ router.post("/team/invites", requireAuth, loadCompanyContext, async (req, res) =
     );
 
     const inviterName = meta.rows?.[0]?.inviter_name || meta.rows?.[0]?.inviter_email || "A teammate";
-    const companyName = meta.rows?.[0]?.company_name || "Carrier Shark";
+    const companyName = meta.rows?.[0]?.company_name || "Project";
 
     const ins = await pool.query(
       `
@@ -264,7 +264,7 @@ router.post("/team/invites/resend", requireAuth, loadCompanyContext, async (req,
     }
 
     const inviterName = inv.inviter_name || inv.inviter_email || "A teammate";
-    const companyName = inv.company_name || "Carrier Shark";
+    const companyName = inv.company_name || "Project";
 
     await sendTeamInviteEmail({
       to: inv.invited_email,

@@ -45,7 +45,7 @@ IF v_outbox_id IS NULL THEN
         p_mailgun_inbox_id,
         p_mailgun_inbox_id,
         v_inbox.conversation_state_id,
-        'Carrier Shark',
+        'Project',
         v_inbox.recipient_email,
         v_inbox.sender_email,
         v_inbox.recipient_email,

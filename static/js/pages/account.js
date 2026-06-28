@@ -2411,7 +2411,6 @@ function renderCreditsUsage(me) {
 
     if ($("me-name")) $("me-name").textContent = me?.name || me?.user?.name || "—";
     if ($("me-email")) $("me-email").textContent = me?.email || me?.user?.email || "—";
-    if ($("me-company")) $("me-company").textContent = me?.company || me?.user?.company || "—";
     
     renderCreditsUsage(me);
 

@@ -8,7 +8,7 @@
 const slides = [
   {
     title: "One place to verify, document, and monitor carriers.",
-    body: "Carrier Shark is a carrier management prototype for carrier search, screening, documents, and change alerts. Take the quick tour to learn more."
+    body: "This project is a carrier management prototype for search, screening, documents, and change alerts. Take the quick tour to learn more."
   },
   {
     title: "Search any Carrier",
@@ -30,7 +30,7 @@ const slides = [
   {
     title: "Build your carrier watchlist",
     body: `
-  Add carriers to <strong>Carriers</strong> so Carrier Shark can monitor authority and safety changes automatically.
+  Add carriers to <strong>Carriers</strong> so the project can monitor authority and safety changes automatically.
   <br><br>
   Get notified when something changes:
   <br><br>
@@ -43,19 +43,19 @@ const slides = [
 {
   title: "Build custom carrier screening profiles",
   body: `
-Create multiple customizable screening profiles so Carrier Shark can automatically determine whether a carrier passes or fails your requirements.
+Create multiple customizable screening profiles so the project can automatically determine whether a carrier passes or fails your requirements.
 
 <br><br>
 
-Build different profiles for different customers, freight types, lanes, risk tolerances, or internal workflows.
+Try different profiles to explore how screening requirements affect results.
 
 <br><br>
 
-Each profile can contain its own combination of rules and screening requirements, allowing you to evaluate carriers differently depending on the situation.
+Each profile can contain its own combination of rules and screening requirements.
 
 <br><br>
 
-Carrier Shark instantly returns a pass or fail result and shows exactly why the carrier met or missed your requirements.
+The project instantly returns a pass or fail result and shows exactly why the carrier met or missed your requirements.
   `,
   img: "/static/images/tour/screening_criteria.png",
   imgPosition: "left top"
@@ -63,36 +63,18 @@ Carrier Shark instantly returns a pass or fail result and shows exactly why the 
   {
     title: "Get alerts when something changes",
     body: `
-  Carrier Shark monitors your carriers for authority, safety, and compliance changes.
+  The project monitors your carriers for authority, safety, and compliance changes.
   <br><br>
   Choose exactly what to monitor and receive alerts by email, webhooks, or the REST API.
   `,
     img: "/static/images/tour/email_alert.png"
-  },
-    {
-    title: "Ready for more advanced workflows?",
-    body: `
-Carrier Shark also includes APIs for connecting carrier search, alerts, saved carriers, and screening directly into other systems.
-
-<br><br>
-
-Use Carrier Shark inside your:
-<br><br>
-
-• TMS<br>
-• CRM<br>
-• Internal onboarding flow<br>
-• Dispatch workflows<br>
-• Custom integrations
-  `,
-    img: "/static/images/tour/api_tour.png"
   },
   {
     title: "You’re ready.",
     body: `
   Start by searching for a carrier, open the profile, and add it to Carriers.
   <br><br>
-  Carrier Shark will monitor the carrier and alert you when something changes.
+  The project will monitor the carrier and alert you when something changes.
   `,
     img: "/static/images/tour/my_account.png",
     cta: { text: "Sign in", href: "/login" }
