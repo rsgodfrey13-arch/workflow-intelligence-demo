@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sign In – Carrier Shark</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <link rel="stylesheet" href="/static/css/base.css">
+  <link rel="stylesheet" href="css/style1.css">
+  <link rel="stylesheet" href="css/login.css">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-16882918169"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'AW-16882918169');
+</script>
+  
+</head>
+<body class="carrier-list">
+  <div class="bg-gradient"></div>
+  <div class="bg-grid"></div>
+  <div id="site-header"></div>
+  <div class="page">
+    
+
+    <main class="page-main">
+      <section class="card" style="max-width:400px;margin:40px auto;padding:24px;">
+        <h2 style="margin-bottom:16px;">Login</h2>
+        <p class="login-sub">Secure access to your Carrier Shark account.</p>
+        <form id="login-form">
+          <div class="form-row" style="margin-bottom:12px;">
+            <label for="email">Email</label><br>
+            <input id="email" name="email" type="email" required
+                   style="width:100%;padding:8px;border-radius:6px;border:1px solid #1f2937;">
+          </div>
+          <div class="form-row" style="margin-bottom:16px;">
+            <label for="password">Password</label><br>
+            <input id="password" name="password" type="password" required
+                   style="width:100%;padding:8px;border-radius:6px;border:1px solid #1f2937;">
+          </div>
+          <button type="submit" style="width:100%;padding:10px;border:none;border-radius:999px;">
+            Sign In
+          </button>
+          <button type="button" id="btn-forgot" class="link-btn">Forgot password?</button>
+          
+          <p id="login-error" style="color:#f97316;margin-top:12px;display:none;"></p>
+          <div style="display:flex;justify-content:flex-end;margin-top:-8px;margin-bottom:14px;">
+            
+          </div>
+        </form>
+      </section>
+    </main>
+  </div>
+
+<div class="modal-backdrop" id="fp-modal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="fp-title">
+    <div class="modal-head">
+      <h3 id="fp-title">Reset password</h3>
+      <button class="icon-btn" type="button" id="fp-close" aria-label="Close">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="field">
+        <label class="field-label" for="fp-email">Email</label>
+        <input class="field-input" id="fp-email" type="email" autocomplete="email" />
+      </div>
+
+      <div class="form-ok" id="fp-ok" style="display:none;"></div>
+      <div class="form-error" id="fp-error" style="display:none;"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-ghost" type="button" id="fp-cancel">Cancel</button>
+      <button class="btn-primary" type="button" id="fp-send">Send reset link</button>
+    </div>
+  </div>
+</div>
+
+<!-- 1. Load Sentry library -->
+<script
+  src="https://js.sentry-cdn.com/1df77c56ba17c2098baf02e362c93be2.min.js"
+  crossorigin="anonymous"
+></script>
+
+<!-- 2. Initialize Sentry with YOUR DSN -->
+<script src="/js/shared/sentry.js"></script>
+
+<!-- 3. Your existing shared code -->
+<script src="/js/shared/shared.js"></script>
+
+<script src="/static/js/pages/login.js" defer></script>
+
+<footer id="site-footer"></footer>
+  
+</body>
+</html>

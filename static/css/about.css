@@ -1,0 +1,51 @@
+.about-page {
+  max-width: 880px;
+}
+
+.about-hero {
+  padding: 60px 0 40px;
+}
+
+.about-hero h1 {
+  font-size: 2.2rem;
+  margin-bottom: 14px;
+}
+
+.about-lead {
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  max-width: 720px;
+}
+
+.about-section {
+  padding: 40px 0;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.about-section h2 {
+  font-size: 1.15rem;
+  margin-bottom: 16px;
+}
+
+.about-section p {
+  margin-bottom: 14px;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+.about-list {
+  list-style: none;
+  padding: 0;
+}
+
+.about-list li {
+  margin-bottom: 10px;
+  color: var(--text-muted);
+}
+
+.about-section-muted {
+  background: rgba(15,23,42,0.45);
+  border: 1px solid var(--cs-border);
+  padding: 40px 24px;
+  border-radius: var(--radius-lg);
+}

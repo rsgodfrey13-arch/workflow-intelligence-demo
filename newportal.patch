@@ -1,0 +1,770 @@
+diff --git a/docs/sql/2026-05-05-harden-handle-mailgun-inbox-admin-action.sql b/docs/sql/2026-05-05-harden-handle-mailgun-inbox-admin-action.sql
+new file mode 100644
+index 0000000000000000000000000000000000000000..c803ab8b9fb61c055bf29c044303c4c3aa529d02
+--- /dev/null
++++ b/docs/sql/2026-05-05-harden-handle-mailgun-inbox-admin-action.sql
+@@ -0,0 +1,60 @@
++-- Manual patch for public.handle_mailgun_inbox_admin_action
++-- Purpose: avoid duplicate email_outbox rows for inbox reply admin actions.
++--
++-- In the REPLY_AND_APPROVE / REPLY_AND_CLOSE branch, replace the existing
++-- unconditional INSERT logic with this update-then-insert pattern.
++
++-- Existing vars expected in function context:
++--   v_reply_text text
++--   v_post_send_action text
++--   v_inbox record (with conversation_state_id, recipient_email, sender_email, message_id)
++--   v_subject text
++--   v_references text
++--   v_outbox_id bigint
++--   p_mailgun_inbox_id bigint
++
++UPDATE public.email_outbox eo
++SET
++    body_text = v_reply_text,
++    status = 'READY_TO_SEND',
++    post_send_action = v_post_send_action,
++    updated_at = now()
++WHERE eo.mailgun_inbox_id = p_mailgun_inbox_id
++  AND eo.status = 'REVIEW'
++RETURNING eo.id INTO v_outbox_id;
++
++IF v_outbox_id IS NULL THEN
++    INSERT INTO public.email_outbox (
++        source_type,
++        source_id,
++        mailgun_inbox_id,
++        conversation_state_id,
++        from_name,
++        from_email,
++        to_email,
++        reply_to_email,
++        subject,
++        body_text,
++        in_reply_to,
++        email_references,
++        status,
++        post_send_action
++    )
++    VALUES (
++        'INBOX_ADMIN_ACTION',
++        p_mailgun_inbox_id,
++        p_mailgun_inbox_id,
++        v_inbox.conversation_state_id,
++        'Carrier Shark',
++        v_inbox.recipient_email,
++        v_inbox.sender_email,
++        v_inbox.recipient_email,
++        v_subject,
++        v_reply_text,
++        v_inbox.message_id,
++        v_references,
++        'READY_TO_SEND',
++        v_post_send_action
++    )
++    RETURNING id INTO v_outbox_id;
++END IF;
+diff --git a/src/routes/internal/adminEmailReview.routes.js b/src/routes/internal/adminEmailReview.routes.js
+index 46fd0bd6eba601df67c2034a4d72d0d9f86c0123..fbcc9d569791d3ca02aa9e991ecbff2bb8fe4c4d 100644
+--- a/src/routes/internal/adminEmailReview.routes.js
++++ b/src/routes/internal/adminEmailReview.routes.js
+@@ -1,129 +1,232 @@
+ "use strict";
+ 
+ const express = require("express");
+ const { requireAuth } = require("../../middleware/requireAuth");
+ const { loadCompanyContext, requireCompanyAdmin } = require("../../middleware/companyContext");
+ const { pool } = require("../../db/pool");
+ 
+ const router = express.Router();
+-const ALLOWED_STATUSES = new Set([
++const INBOX_ALLOWED_STATUSES = new Set([
+   "NEW_EMAIL",
+   "NEEDS_TYPE",
+   "REVIEW",
+   "ALLOWED",
+-  "REPLY_AND_ALLOW",
+-  "REPLY_AND_CLOSE",
++  "OUTBOX_QUEUED",
+   "CLOSED",
+-  "FAILED",
+   "SENT",
++  "FAILED",
+   "NO_REPLY",
+ ]);
+-const FILTER_STATUSES = new Set(["OPEN_QUEUE", "ALL", ...ALLOWED_STATUSES]);
++const INBOX_FILTER_STATUSES = new Set(["OPEN_QUEUE", "ALL", ...INBOX_ALLOWED_STATUSES]);
++const INBOX_ALLOWED_ACTIONS = new Set(["APPROVE", "CLOSE", "REPLY_AND_APPROVE", "REPLY_AND_CLOSE"]);
+ 
+-function normalizeStatus(v) {
+-  const value = String(v || "").trim().toUpperCase();
+-  if (!ALLOWED_STATUSES.has(value)) throw new Error("Invalid status value.");
+-  return value;
+-}
++const OUTBOX_ALLOWED_STATUSES = new Set(["REVIEW", "READY_TO_SEND", "SENDING", "SENT", "CLOSED", "FAILED"]);
++const OUTBOX_FILTER_STATUSES = new Set(["REVIEW_QUEUE", "ALL", ...OUTBOX_ALLOWED_STATUSES]);
++const OUTBOX_ALLOWED_ACTIONS = new Set(["APPROVE", "CLOSE"]);
+ 
+ router.get("/admin/email-review", requireAuth, loadCompanyContext, requireCompanyAdmin, async (req, res) => {
+   try {
+     const requested = String(req.query.status || "OPEN_QUEUE").trim().toUpperCase();
+-    if (!FILTER_STATUSES.has(requested)) return res.status(400).json({ ok: false, error: "Invalid status filter." });
++    if (!INBOX_FILTER_STATUSES.has(requested)) return res.status(400).json({ ok: false, error: "Invalid status filter." });
+ 
+     let where = "1=1";
+     let params = [];
+     if (requested === "OPEN_QUEUE") {
+       where = "status IN ('NEW_EMAIL', 'NEEDS_TYPE', 'REVIEW')";
+     } else if (requested === "CLOSED") {
+       where = "status IN ('CLOSED', 'NO_REPLY')";
+     } else if (requested !== "ALL") {
+       where = "status = $1";
+       params = [requested];
+     }
+ 
+     const { rows } = await pool.query(
+       `SELECT id, message_id, recipient_email, sender_email, sender_domain, subject, in_reply_to, email_references,
+               body_plain, body_html, stripped_text, stripped_html, attachment_count, status,
+               email_type, suggested_reply, replacement_text, notes, created_at, updated_at
+          FROM public.mailgun_inbox
+         WHERE ${where}
+         ORDER BY created_at DESC
+         LIMIT 250`,
+       params
+     );
+ 
+     return res.json({ ok: true, rows });
+   } catch (error) {
+     return res.status(500).json({ ok: false, error: error.message || "Failed to load email review rows." });
+   }
+ });
+ 
+ router.post("/admin/email-review/:id/update", requireAuth, loadCompanyContext, requireCompanyAdmin, async (req, res) => {
+   try {
+     const id = Number(req.params.id);
+     if (!Number.isFinite(id) || id <= 0) return res.status(400).json({ ok: false, error: "Invalid id." });
+ 
+     const updates = [];
+     const values = [];
+     const allowedFields = ["email_type", "suggested_reply", "replacement_text", "notes"];
+ 
+     for (const field of allowedFields) {
+       if (Object.prototype.hasOwnProperty.call(req.body || {}, field)) {
+-        let value = req.body[field];
+         updates.push(`${field} = $${values.length + 1}`);
+-        values.push(value === "" ? null : value);
++        values.push(req.body[field] === "" ? null : req.body[field]);
+       }
+     }
+ 
+     if (!updates.length) return res.status(400).json({ ok: false, error: "No updatable fields provided." });
+ 
+     values.push(id);
+     const result = await pool.query(
+       `UPDATE public.mailgun_inbox
+           SET ${updates.join(", ")}, updated_at = NOW()
+         WHERE id = $${values.length}`,
+       values
+     );
+ 
+     if (result.rowCount === 0) {
+       return res.status(404).json({ ok: false, error: "Email review row not found." });
+     }
+ 
+     return res.json({ ok: true });
+   } catch (error) {
+     return res.status(400).json({ ok: false, error: error.message || "Failed to update row." });
+   }
+ });
+ 
+-router.post("/admin/email-review/:id/status", requireAuth, loadCompanyContext, requireCompanyAdmin, async (req, res) => {
++router.post("/admin/email-review/:id/action", requireAuth, loadCompanyContext, requireCompanyAdmin, async (req, res) => {
+   try {
+     const id = Number(req.params.id);
+     if (!Number.isFinite(id) || id <= 0) return res.status(400).json({ ok: false, error: "Invalid id." });
+-    const status = normalizeStatus(req.body?.status);
+-    const replacementTextRaw = req.body?.replacement_text;
+-    const replacementText = typeof replacementTextRaw === "string" ? replacementTextRaw.trim() : "";
+-    const requiresReplacement = status === "REPLY_AND_ALLOW" || status === "REPLY_AND_CLOSE";
+-    if (requiresReplacement && !replacementText) {
+-      return res.status(400).json({ ok: false, error: "Replacement reply is required for this action." });
++
++    const action = String(req.body?.action || "").trim().toUpperCase();
++    if (!INBOX_ALLOWED_ACTIONS.has(action)) return res.status(400).json({ ok: false, error: "Invalid action." });
++
++    const suggestedReply = req.body?.suggested_reply;
++    const replacementText = req.body?.replacement_text;
++    if (action === "REPLY_AND_APPROVE" || action === "REPLY_AND_CLOSE") {
++      const replyText = String((replacementText || suggestedReply || "")).trim();
++      if (!replyText) return res.status(400).json({ ok: false, error: "Reply text is required." });
+     }
+ 
+-    let result;
+-    if (requiresReplacement) {
+-      result = await pool.query(
+-        "UPDATE public.mailgun_inbox SET replacement_text = $1, status = $2, updated_at = NOW() WHERE id = $3",
+-        [replacementTextRaw, status, id]
+-      );
+-    } else {
+-      result = await pool.query("UPDATE public.mailgun_inbox SET status = $1, updated_at = NOW() WHERE id = $2", [status, id]);
++    const { rows } = await pool.query(
++      `SELECT *
++         FROM public.handle_mailgun_inbox_admin_action(
++            p_mailgun_inbox_id := $1,
++            p_action := $2,
++            p_email_type := $3,
++            p_suggested_reply := $4,
++            p_replacement_text := $5,
++            p_notes := $6
++         )`,
++      [id, action, req.body?.email_type || null, suggestedReply || null, replacementText || null, req.body?.notes || null]
++    );
++
++    return res.json({ ok: true, result: rows[0] || null });
++  } catch (error) {
++    return res.status(400).json({ ok: false, error: error.message || "Failed to apply action." });
++  }
++});
++
++router.get("/admin/email-review/outbox", requireAuth, loadCompanyContext, requireCompanyAdmin, async (req, res) => {
++  try {
++    const requested = String(req.query.status || "REVIEW_QUEUE").trim().toUpperCase();
++    if (!OUTBOX_FILTER_STATUSES.has(requested)) return res.status(400).json({ ok: false, error: "Invalid status filter." });
++
++    let where = "1=1";
++    let params = [];
++    if (requested === "REVIEW_QUEUE") {
++      where = "status = 'REVIEW'";
++    } else if (requested !== "ALL") {
++      where = "status = $1";
++      params = [requested];
+     }
+-    if (result.rowCount === 0) {
+-      return res.status(404).json({ ok: false, error: "Email review row not found." });
++
++    const { rows } = await pool.query(
++      `SELECT id, source_type, source_id, mailgun_inbox_id, conversation_state_id,
++              from_email, from_name, to_email, reply_to_email, subject,
++              body_text, body_html, in_reply_to, email_references, status,
++              post_send_action, outbound_mailgun_message_id, error_message,
++              created_at, updated_at, sent_at
++         FROM public.email_outbox
++        WHERE ${where}
++        ORDER BY created_at DESC
++        LIMIT 250`,
++      params
++    );
++
++    return res.json({ ok: true, rows });
++  } catch (error) {
++    return res.status(500).json({ ok: false, error: error.message || "Failed to load outbox review rows." });
++  }
++});
++
++router.post("/admin/email-review/outbox/:id/update", requireAuth, loadCompanyContext, requireCompanyAdmin, async (req, res) => {
++  try {
++    const id = Number(req.params.id);
++    if (!Number.isFinite(id) || id <= 0) return res.status(400).json({ ok: false, error: "Invalid id." });
++
++    const bodyTextProvided = Object.prototype.hasOwnProperty.call(req.body || {}, "body_text");
++    const bodyHtmlProvided = Object.prototype.hasOwnProperty.call(req.body || {}, "body_html");
++    if (!bodyTextProvided && !bodyHtmlProvided) {
++      return res.status(400).json({ ok: false, error: "No updatable fields provided." });
+     }
++
++    const result = await pool.query(
++      `UPDATE public.email_outbox
++          SET body_text = COALESCE($1, body_text),
++              body_html = COALESCE($2, body_html),
++              updated_at = NOW()
++        WHERE id = $3`,
++      [bodyTextProvided ? req.body.body_text : null, bodyHtmlProvided ? req.body.body_html : null, id]
++    );
++
++    if (result.rowCount === 0) return res.status(404).json({ ok: false, error: "Outbox review row not found." });
++    return res.json({ ok: true });
++  } catch (error) {
++    return res.status(400).json({ ok: false, error: error.message || "Failed to update outbox row." });
++  }
++});
++
++router.post("/admin/email-review/outbox/:id/action", requireAuth, loadCompanyContext, requireCompanyAdmin, async (req, res) => {
++  try {
++    const id = Number(req.params.id);
++    if (!Number.isFinite(id) || id <= 0) return res.status(400).json({ ok: false, error: "Invalid id." });
++
++    const action = String(req.body?.action || "").trim().toUpperCase();
++    if (!OUTBOX_ALLOWED_ACTIONS.has(action)) return res.status(400).json({ ok: false, error: "Invalid action." });
++
++    const bodyTextProvided = Object.prototype.hasOwnProperty.call(req.body || {}, "body_text");
++    const bodyHtmlProvided = Object.prototype.hasOwnProperty.call(req.body || {}, "body_html");
++    const bodyText = bodyTextProvided ? req.body.body_text : null;
++    const bodyHtml = bodyHtmlProvided ? req.body.body_html : null;
++
++    const { rows: existingRows } = await pool.query("SELECT body_text FROM public.email_outbox WHERE id = $1", [id]);
++    if (!existingRows.length) return res.status(404).json({ ok: false, error: "Outbox review row not found." });
++
++    const effectiveBodyText = bodyTextProvided ? bodyText : existingRows[0].body_text;
++    if (action === "APPROVE" && !String(effectiveBodyText || "").trim()) {
++      return res.status(400).json({ ok: false, error: "Body text is required." });
++    }
++
++    const nextStatus = action === "APPROVE" ? "READY_TO_SEND" : "CLOSED";
++    const clearErrorSql = action === "APPROVE" ? ", error_message = NULL" : "";
++
++    const result = await pool.query(
++      `UPDATE public.email_outbox
++          SET body_text = CASE WHEN $1::boolean THEN $2 ELSE body_text END,
++              body_html = CASE WHEN $3::boolean THEN $4 ELSE body_html END,
++              status = $5,
++              updated_at = NOW()
++              ${clearErrorSql}
++        WHERE id = $6`,
++      [bodyTextProvided, bodyText, bodyHtmlProvided, bodyHtml, nextStatus, id]
++    );
++
++    if (result.rowCount === 0) return res.status(404).json({ ok: false, error: "Outbox review row not found." });
+     return res.json({ ok: true });
+   } catch (error) {
+-    return res.status(400).json({ ok: false, error: error.message || "Failed to update status." });
++    return res.status(400).json({ ok: false, error: error.message || "Failed to apply outbox action." });
+   }
+ });
+ 
+ module.exports = router;
+diff --git a/static/admin-email-review.html b/static/admin-email-review.html
+index 778941798cec70aa3ae2104213e21bae2f2b325c..151bec1acd32a71d7391ee671a4c94e9d95afabb 100644
+--- a/static/admin-email-review.html
++++ b/static/admin-email-review.html
+@@ -6,63 +6,49 @@
+   <title>Manual Email Review | Carrier Shark</title>
+   <link rel="stylesheet" href="/static/css/base.css" />
+   <link rel="stylesheet" href="/static/css/style1.css" />
+   <link rel="stylesheet" href="/static/css/admin-insurance-document-review.css" />
+   <link rel="stylesheet" href="/static/css/admin-email-review.css" />
+   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+ </head>
+ <body class="carrier-list email-review-page">
+   <div class="bg-gradient"></div>
+   <div class="bg-grid"></div>
+   <div id="site-header"></div>
+ 
+   <main class="review-shell">
+     <header class="review-header">
+       <div>
+         <h1>Manual Email Review</h1>
+         <p>Review inbound Mailgun emails, classify unclear messages, and approve or replace drafted replies.</p>
+         <p class="admin-jump-link"><a href="/admin/insurance-exceptions">Go to Insurance Exceptions</a></p>
+       </div>
+       <button id="refresh-btn" class="btn-ghost" type="button">Refresh</button>
+     </header>
+ 
+     <section class="review-card">
+       <div id="status-banner" class="status-banner" hidden></div>
+ 
+-      <div class="tab-bar" aria-label="Manual email review filters">
++      <div class="tab-bar" aria-label="Manual email review modes">
++        <button id="mode-inbox" class="btn-inline" type="button">Inbox Reviews</button>
++        <button id="mode-outbox" class="btn-ghost" type="button">Outbox Reviews</button>
+         <label for="status-filter">Filter</label>
+-        <select id="status-filter">
+-          <option value="OPEN_QUEUE" selected>Open Queue</option>
+-          <option value="ALL">All</option>
+-          <option value="NEW_EMAIL">NEW_EMAIL</option>
+-          <option value="NEEDS_TYPE">NEEDS_TYPE</option>
+-          <option value="REVIEW">REVIEW</option>
+-          <option value="ALLOWED">ALLOWED</option>
+-          <option value="REPLY_AND_ALLOW">REPLY_AND_ALLOW</option>
+-          <option value="REPLY_AND_CLOSE">REPLY_AND_CLOSE</option>
+-          <option value="CLOSED">CLOSED</option>
+-          <option value="SENT">SENT</option>
+-          <option value="FAILED">FAILED</option>
+-        </select>
++        <select id="status-filter"></select>
+       </div>
+ 
+       <section class="tab-section" data-tab-section="table">
+         <div class="table-wrap">
+           <table class="review-table">
+-            <thead>
+-              <tr>
+-                <th>Received</th><th>From</th><th>To</th><th>Subject</th><th>Type</th><th>Status</th><th>Actions</th>
+-              </tr>
+-            </thead>
++            <thead id="review-table-head"></thead>
+             <tbody id="email-queue-body"></tbody>
+           </table>
+         </div>
+         <div id="email-empty-state" class="empty-state" hidden></div>
+       </section>
+     </section>
+   </main>
+ 
+   <script src="/static/js/shared/sentry.js"></script>
+   <script src="/static/js/shared/shared.js"></script>
+   <script src="/static/js/pages/admin-email-review.js"></script>
+ </body>
+ </html>
+diff --git a/static/js/pages/admin-email-review.js b/static/js/pages/admin-email-review.js
+index 6d1924a6cb1ae8abfcf1adf0b6fc278e5274fd6a..8637a1379e7288617317b89f8ccbd5e53f5c20ad 100644
+--- a/static/js/pages/admin-email-review.js
++++ b/static/js/pages/admin-email-review.js
+@@ -1,318 +1,53 @@
+ (() => {
+-  const EMPTY_COPY = {
+-    OPEN_QUEUE: "No emails in the open queue.",
+-    ALL: "No emails found.",
+-    default: "No emails for this filter.",
+-  };
+-
+-  const EMAIL_TYPES = [
+-    "BROKER_LOAD",
+-    "CARRIER_TRUCK",
+-    "CARRIER_LOAD_RESPONSE",
+-    "QUESTION",
+-    "SALES_WARMUP",
+-    "SPAM",
+-    "UNKNOWN",
+-    "OTHER",
+-  ];
+-
+-  const state = {
+-    activeFilter: "OPEN_QUEUE",
+-    rows: [],
+-    expandedId: null,
+-    submittingById: {},
+-  };
+-
+-  const statusFilter = document.getElementById("status-filter");
+-  const refreshBtn = document.getElementById("refresh-btn");
+-  const statusBanner = document.getElementById("status-banner");
+-  const bodyEl = document.getElementById("email-queue-body");
+-  const emptyStateEl = document.getElementById("email-empty-state");
+-
+-  const rowId = (value) => String(value ?? "");
+-
+-  const escapeHtml = (v) =>
+-    String(v ?? "")
+-      .replaceAll("&", "&amp;")
+-      .replaceAll("<", "&lt;")
+-      .replaceAll(">", "&gt;")
+-      .replaceAll('"', "&quot;")
+-      .replaceAll("'", "&#039;");
+-
++  const INBOX_FILTERS = ["OPEN_QUEUE", "ALL", "NEW_EMAIL", "NEEDS_TYPE", "REVIEW", "ALLOWED", "OUTBOX_QUEUED", "CLOSED", "SENT", "FAILED"];
++  const OUTBOX_FILTERS = ["REVIEW_QUEUE", "ALL", "REVIEW", "READY_TO_SEND", "SENDING", "SENT", "CLOSED", "FAILED"];
++  const EMAIL_TYPES = ["BROKER_LOAD", "CARRIER_TRUCK", "CARRIER_LOAD_RESPONSE", "QUESTION", "SALES_WARMUP", "SPAM", "UNKNOWN", "OTHER"];
++
++  const state = { mode: "inbox", inbox: { activeFilter: "OPEN_QUEUE", rows: [], expandedId: null, submittingById: {} }, outbox: { activeFilter: "REVIEW_QUEUE", rows: [], expandedId: null, submittingById: {} } };
++
++  const $ = (id) => document.getElementById(id);
++  const statusFilter = $("status-filter"); const refreshBtn = $("refresh-btn"); const statusBanner = $("status-banner");
++  const bodyEl = $("email-queue-body"); const emptyStateEl = $("email-empty-state"); const headEl = $("review-table-head");
++  const modeInboxBtn = $("mode-inbox"); const modeOutboxBtn = $("mode-outbox");
++  const rowId = (v) => String(v ?? "");
++  const escapeHtml = (v) => String(v ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+   const formatDate = (v) => (v ? new Date(v).toLocaleString() : "—");
++  const current = () => state[state.mode];
+ 
+-  function showStatus(message, type = "error") {
+-    statusBanner.hidden = false;
+-    statusBanner.classList.toggle("is-error", type === "error");
+-    statusBanner.classList.toggle("is-success", type === "success");
+-    statusBanner.textContent = message;
+-  }
++  function showStatus(message, type = "error") { statusBanner.hidden = false; statusBanner.classList.toggle("is-error", type === "error"); statusBanner.classList.toggle("is-success", type === "success"); statusBanner.textContent = message; }
++  function clearStatus() { statusBanner.hidden = true; statusBanner.classList.remove("is-error", "is-success"); statusBanner.textContent = ""; }
++  async function apiGet(url){const r=await fetch(url,{credentials:"include"});const p=await r.json().catch(()=>({}));if(!r.ok||p.ok===false) throw new Error(p.error||`Request failed: ${r.status}`);return p;}
++  async function apiPost(url,body){const r=await fetch(url,{method:"POST",credentials:"include",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});const p=await r.json().catch(()=>({}));if(!r.ok||p.ok===false) throw new Error(p.error||`Request failed: ${r.status}`);return p;}
+ 
+-  function clearStatus() {
+-    statusBanner.hidden = true;
+-    statusBanner.classList.remove("is-error", "is-success");
+-    statusBanner.textContent = "";
+-  }
++  function filterOptions(){ return (state.mode === "inbox" ? INBOX_FILTERS : OUTBOX_FILTERS).map((f)=>`<option value="${f}" ${current().activeFilter===f?"selected":""}>${f.replaceAll("_"," ")}</option>`).join(""); }
++  function renderHead(){ headEl.innerHTML = state.mode === "inbox" ? "<tr><th>Received</th><th>From</th><th>To</th><th>Subject</th><th>Type</th><th>Status</th><th>Actions</th></tr>" : "<tr><th>Created</th><th>From</th><th>To</th><th>Subject</th><th>Source</th><th>Status</th><th>Actions</th></tr>"; }
+ 
+-  async function apiGet(url) {
+-    const response = await fetch(url, { credentials: "include" });
+-    const payload = await response.json().catch(() => ({}));
++  function panelInbox(row){const id=rowId(row.id),sub=current().submittingById[id]===true,body=row.stripped_text||row.body_plain||"No plain body available.";return `<div class="resolve-panel"><div class="form-grid"><div><label>From</label><input value="${escapeHtml(row.sender_email||"")}" disabled></div><div><label>To</label><input value="${escapeHtml(row.recipient_email||"")}" disabled></div><div><label>Subject</label><input value="${escapeHtml(row.subject||"")}" disabled></div><div style="grid-column:1/-1"><label>Email body</label><div class="email-body">${escapeHtml(body)}</div></div><div style="grid-column:1/-1"><label>Suggested reply</label><textarea data-field="suggested_reply" data-id="${id}">${escapeHtml(row.suggested_reply||"")}</textarea></div><div style="grid-column:1/-1"><label>Replacement reply</label><textarea data-field="replacement_text" data-id="${id}">${escapeHtml(row.replacement_text||"")}</textarea></div><div style="grid-column:1/-1"><label>Notes</label><textarea data-field="notes" data-id="${id}">${escapeHtml(row.notes||"")}</textarea></div><div><label>Email type</label><select data-field="email_type" data-id="${id}"><option value="">—</option>${EMAIL_TYPES.map((t)=>`<option value="${t}" ${row.email_type===t?"selected":""}>${t}</option>`).join("")}</select></div><div><label>Status</label><input value="${escapeHtml(row.status||"")}" disabled></div></div><div class="panel-actions"><button class="btn-inline" data-action="inbox-save" data-id="${id}" ${sub?"disabled":""}>Save</button><button class="btn-inline" data-action="inbox-action" data-value="APPROVE" data-id="${id}" ${sub?"disabled":""}>Approve</button><button class="btn-inline" data-action="inbox-action" data-value="CLOSE" data-id="${id}" ${sub?"disabled":""}>Close</button><button class="btn-inline" data-action="inbox-action" data-value="REPLY_AND_APPROVE" data-id="${id}" ${sub?"disabled":""}>Reply and Approve</button><button class="btn-inline" data-action="inbox-action" data-value="REPLY_AND_CLOSE" data-id="${id}" ${sub?"disabled":""}>Reply and Close</button></div></div>`; }
++  function panelOutbox(row){const id=rowId(row.id),sub=current().submittingById[id]===true;return `<div class="resolve-panel"><div class="form-grid"><div><label>From</label><input value="${escapeHtml(row.from_email||"")}" disabled></div><div><label>To</label><input value="${escapeHtml(row.to_email||"")}" disabled></div><div><label>Subject</label><input value="${escapeHtml(row.subject||"")}" disabled></div><div><label>Source Type</label><input value="${escapeHtml(row.source_type||"")}" disabled></div><div><label>Source ID</label><input value="${escapeHtml(row.source_id||"")}" disabled></div><div><label>mailgun_inbox_id</label><input value="${escapeHtml(row.mailgun_inbox_id||"")}" disabled></div><div><label>conversation_state_id</label><input value="${escapeHtml(row.conversation_state_id||"")}" disabled></div><div><label>in_reply_to</label><input value="${escapeHtml(row.in_reply_to||"")}" disabled></div><div><label>email_references</label><input value="${escapeHtml(row.email_references||"")}" disabled></div><div><label>post_send_action</label><input value="${escapeHtml(row.post_send_action||"")}" disabled></div><div style="grid-column:1/-1"><label>Body text</label><textarea data-field="body_text" data-id="${id}">${escapeHtml(row.body_text||"")}</textarea></div><div style="grid-column:1/-1"><label>Body html</label><textarea data-field="body_html" data-id="${id}">${escapeHtml(row.body_html||"")}</textarea></div><div style="grid-column:1/-1"><label>Error message</label><input value="${escapeHtml(row.error_message||"")}" disabled></div><div><label>Status</label><input value="${escapeHtml(row.status||"")}" disabled></div></div><div class="panel-actions"><button class="btn-inline" data-action="outbox-save" data-id="${id}" ${sub?"disabled":""}>Save</button><button class="btn-inline" data-action="outbox-action" data-value="APPROVE" data-id="${id}" ${sub?"disabled":""}>Approve</button><button class="btn-inline" data-action="outbox-action" data-value="CLOSE" data-id="${id}" ${sub?"disabled":""}>Close</button></div></div>`; }
+ 
+-    if (!response.ok || payload.ok === false) {
+-      throw new Error(payload.error || `Request failed: ${response.status}`);
+-    }
+-
+-    return payload;
++  function renderRows(){ bodyEl.innerHTML=""; renderHead(); statusFilter.innerHTML = filterOptions();
++    if(!current().rows.length){emptyStateEl.hidden=false;emptyStateEl.textContent="No rows found for this filter.";return;} emptyStateEl.hidden=true;
++    for(const row of current().rows){ const id=rowId(row.id),exp=current().expandedId===id; const tr=document.createElement("tr");
++      tr.innerHTML = state.mode==="inbox" ? `<td>${escapeHtml(formatDate(row.created_at))}</td><td>${escapeHtml(row.sender_email||"—")}</td><td>${escapeHtml(row.recipient_email||"—")}</td><td>${escapeHtml(row.subject||"—")}</td><td>${escapeHtml(row.email_type||"—")}</td><td>${escapeHtml(row.status||"—")}</td><td><button class="btn-inline" data-action="toggle" data-id="${id}">${exp?"Hide":"Expand"}</button></td>` : `<td>${escapeHtml(formatDate(row.created_at))}</td><td>${escapeHtml(row.from_email||"—")}</td><td>${escapeHtml(row.to_email||"—")}</td><td>${escapeHtml(row.subject||"—")}</td><td>${escapeHtml(row.source_type||"—")}</td><td>${escapeHtml(row.status||"—")}</td><td><button class="btn-inline" data-action="toggle" data-id="${id}">${exp?"Hide":"Expand"}</button></td>`;
++      bodyEl.appendChild(tr); if(exp){const d=document.createElement("tr");d.className="resolve-row";d.innerHTML=`<td colspan="7">${state.mode==="inbox"?panelInbox(row):panelOutbox(row)}</td>`;bodyEl.appendChild(d);} }
+   }
+ 
+-  async function apiPost(url, body) {
+-    const response = await fetch(url, {
+-      method: "POST",
+-      credentials: "include",
+-      headers: { "Content-Type": "application/json" },
+-      body: JSON.stringify(body),
+-    });
+-
+-    const payload = await response.json().catch(() => ({}));
+-
+-    if (!response.ok || payload.ok === false) {
+-      throw new Error(payload.error || `Request failed: ${response.status}`);
+-    }
+-
+-    return payload;
+-  }
+-
+-  function panelHtml(row) {
+-    const id = rowId(row.id);
+-    const isSubmitting = state.submittingById[id] === true;
+-    const bodyText = row.stripped_text || row.body_plain || "No plain body available.";
+-
+-    return `
+-      <div class="resolve-panel">
+-        <div class="form-grid">
+-          <div>
+-            <label>From</label>
+-            <input type="text" value="${escapeHtml(row.sender_email || "")}" disabled />
+-          </div>
+-
+-          <div>
+-            <label>To</label>
+-            <input type="text" value="${escapeHtml(row.recipient_email || "")}" disabled />
+-          </div>
+-
+-          <div>
+-            <label>Subject</label>
+-            <input type="text" value="${escapeHtml(row.subject || "")}" disabled />
+-          </div>
+-
+-          <div>
+-            <label>Message ID</label>
+-            <input type="text" value="${escapeHtml(row.message_id || "")}" disabled />
+-          </div>
+-
+-          <div>
+-            <label>In Reply To</label>
+-            <input type="text" value="${escapeHtml(row.in_reply_to || "")}" disabled />
+-          </div>
+-
+-          <div>
+-            <label>References</label>
+-            <input type="text" value="${escapeHtml(row.email_references || "")}" disabled />
+-          </div>
+-
+-          <div>
+-            <label>Received date</label>
+-            <input type="text" value="${escapeHtml(formatDate(row.created_at))}" disabled />
+-          </div>
+-
+-          <div style="grid-column: 1 / -1;">
+-            <label>Email body</label>
+-            <div class="email-body">${escapeHtml(bodyText)}</div>
+-          </div>
+-
+-          <div style="grid-column: 1 / -1;">
+-            <label>Suggested reply</label>
+-            <textarea data-field="suggested_reply" data-id="${escapeHtml(id)}">${escapeHtml(row.suggested_reply || "")}</textarea>
+-          </div>
+-
+-          <div style="grid-column: 1 / -1;">
+-            <label>Replacement reply</label>
+-            <textarea data-field="replacement_text" data-id="${escapeHtml(id)}">${escapeHtml(row.replacement_text || "")}</textarea>
+-          </div>
+-
+-          <div style="grid-column: 1 / -1;">
+-            <label>Notes</label>
+-            <textarea data-field="notes" data-id="${escapeHtml(id)}">${escapeHtml(row.notes || "")}</textarea>
+-          </div>
+-
+-          <div>
+-            <label>Email type</label>
+-            <select data-field="email_type" data-id="${escapeHtml(id)}">
+-              <option value="">—</option>
+-              ${EMAIL_TYPES.map(
+-                (t) => `<option value="${escapeHtml(t)}" ${row.email_type === t ? "selected" : ""}>${escapeHtml(t)}</option>`
+-              ).join("")}
+-            </select>
+-          </div>
+-
+-          <div>
+-            <label>Status</label>
+-            <input type="text" value="${escapeHtml(row.status || "")}" disabled />
+-          </div>
+-        </div>
+-
+-        <div class="panel-actions">
+-          <button class="btn-inline" data-action="save" data-id="${escapeHtml(id)}" ${isSubmitting ? "disabled" : ""}>Save</button>
+-          <button class="btn-inline" data-action="status" data-status="ALLOWED" data-id="${escapeHtml(id)}" ${isSubmitting ? "disabled" : ""}>Mark Allowed</button>
+-          <button class="btn-inline" data-action="status" data-status="CLOSED" data-id="${escapeHtml(id)}" ${isSubmitting ? "disabled" : ""}>Close</button>
+-          <button class="btn-inline" data-action="status" data-status="REPLY_AND_ALLOW" data-id="${escapeHtml(id)}" ${isSubmitting ? "disabled" : ""}>Reply and Allow</button>
+-          <button class="btn-inline" data-action="status" data-status="REPLY_AND_CLOSE" data-id="${escapeHtml(id)}" ${isSubmitting ? "disabled" : ""}>Reply and Close</button>
+-        </div>
+-      </div>
+-    `;
+-  }
++  function formValue(id, field){const el=document.querySelector(`[data-field="${field}"][data-id="${CSS.escape(rowId(id))}"]`);return el?el.value:null;}
++  async function loadRows(){const c=current(); const base=state.mode==="inbox"?"/api/admin/email-review":"/api/admin/email-review/outbox"; const p=await apiGet(`${base}?status=${encodeURIComponent(c.activeFilter)}`); c.rows=Array.isArray(p.rows)?p.rows:[]; if(c.expandedId&&!c.rows.some((r)=>rowId(r.id)===c.expandedId)) c.expandedId=null; renderRows();}
+ 
+-  function renderRows() {
+-    bodyEl.innerHTML = "";
++  async function submit(id, fn){ try{current().submittingById[id]=true; renderRows(); await fn(); showStatus("Update saved.","success"); await loadRows(); } catch(e){showStatus(e.message||"Failed to update.");} finally{current().submittingById[id]=false; renderRows();}}
+ 
+-    if (!state.rows.length) {
+-      emptyStateEl.textContent = EMPTY_COPY[state.activeFilter] || EMPTY_COPY.default;
+-      emptyStateEl.hidden = false;
+-      return;
+-    }
+-
+-    emptyStateEl.hidden = true;
+-
+-    for (const row of state.rows) {
+-      const id = rowId(row.id);
+-      const isExpanded = state.expandedId === id;
+-
+-      const tr = document.createElement("tr");
+-      tr.innerHTML = `
+-        <td>${escapeHtml(formatDate(row.created_at))}</td>
+-        <td>${escapeHtml(row.sender_email || "—")}</td>
+-        <td>${escapeHtml(row.recipient_email || "—")}</td>
+-        <td>${escapeHtml(row.subject || "—")}</td>
+-        <td>${escapeHtml(row.email_type || "—")}</td>
+-        <td>${escapeHtml(row.status || "—")}</td>
+-        <td>
+-          <button class="btn-inline" data-action="toggle" data-id="${escapeHtml(id)}">
+-            ${isExpanded ? "Hide" : "Expand"}
+-          </button>
+-        </td>
+-      `;
+-
+-      bodyEl.appendChild(tr);
+-
+-      if (isExpanded) {
+-        const detail = document.createElement("tr");
+-        detail.className = "resolve-row";
+-        detail.innerHTML = `<td colspan="7">${panelHtml(row)}</td>`;
+-        bodyEl.appendChild(detail);
+-      }
+-    }
+-  }
+-
+-  async function loadRows() {
+-    const payload = await apiGet(`/api/admin/email-review?status=${encodeURIComponent(state.activeFilter)}`);
+-    state.rows = Array.isArray(payload.rows) ? payload.rows : [];
+-
+-    if (state.expandedId && !state.rows.some((row) => rowId(row.id) === state.expandedId)) {
+-      state.expandedId = null;
+-    }
+-
+-    renderRows();
+-  }
+-
+-  function formValue(id, field) {
+-    const input = document.querySelector(`[data-field="${field}"][data-id="${CSS.escape(rowId(id))}"]`);
+-    return input ? input.value : null;
+-  }
+-
+-  async function onActionClick(event) {
+-    const btn = event.target.closest("button[data-action]");
+-    if (!btn) return;
+-
+-    const action = btn.dataset.action;
+-    const id = rowId(btn.dataset.id);
+-    if (!id) return;
+-
+-    if (action === "toggle") {
+-      state.expandedId = state.expandedId === id ? null : id;
+-      renderRows();
+-      return;
+-    }
+-
+-    let payload = null;
+-
+-    if (action === "save") {
+-      payload = {
+-        email_type: formValue(id, "email_type"),
+-        suggested_reply: formValue(id, "suggested_reply"),
+-        replacement_text: formValue(id, "replacement_text"),
+-        notes: formValue(id, "notes"),
+-      };
+-    } else if (action === "status") {
+-      const requestedStatus = btn.dataset.status;
+-      if (requestedStatus === "REPLY_AND_ALLOW" || requestedStatus === "REPLY_AND_CLOSE") {
+-        const replacementText = (formValue(id, "replacement_text") || "").trim();
+-        if (!replacementText) {
+-          showStatus("Replacement reply is required before sending reply-and-close/allow actions.");
+-          return;
+-        }
+-        payload = { status: requestedStatus, replacement_text: formValue(id, "replacement_text") };
+-      } else {
+-        payload = { status: requestedStatus };
+-      }
+-    }
+-
+-    try {
+-      state.submittingById[id] = true;
+-      renderRows();
+-
+-      if (action === "save") {
+-        await apiPost(`/api/admin/email-review/${encodeURIComponent(id)}/update`, payload);
+-      } else if (action === "status") {
+-        await apiPost(`/api/admin/email-review/${encodeURIComponent(id)}/status`, payload);
+-      }
+-
+-      showStatus("Update saved.", "success");
+-      await loadRows();
+-    } catch (error) {
+-      showStatus(error.message || "Failed to update.");
+-    } finally {
+-      state.submittingById[id] = false;
+-      renderRows();
+-    }
+-  }
+-
+-  function wireHandlers() {
+-    statusFilter.addEventListener("change", async () => {
+-      state.activeFilter = statusFilter.value;
+-      state.expandedId = null;
+-      clearStatus();
+-      await loadRows();
+-    });
+-
+-    refreshBtn.addEventListener("click", () => {
+-      clearStatus();
+-      loadRows().catch((e) => showStatus(e.message));
+-    });
+-
+-    bodyEl.addEventListener("click", (event) => onActionClick(event));
+-  }
+-
+-  window.addEventListener("DOMContentLoaded", async () => {
+-    if (typeof loadHeader === "function") {
+-      await loadHeader();
+-    }
++  bodyEl.addEventListener("click", (event)=>{const btn=event.target.closest("button[data-action]"); if(!btn) return; const action=btn.dataset.action; const id=rowId(btn.dataset.id); if(action==="toggle"){current().expandedId=current().expandedId===id?null:id; renderRows(); return;}
++    if(action==="inbox-save"){const payload={email_type:formValue(id,"email_type"),suggested_reply:formValue(id,"suggested_reply"),replacement_text:formValue(id,"replacement_text"),notes:formValue(id,"notes")}; submit(id,()=>apiPost(`/api/admin/email-review/${encodeURIComponent(id)}/update`,payload));}
++    if(action==="inbox-action"){const payload={action:btn.dataset.value,email_type:formValue(id,"email_type"),suggested_reply:formValue(id,"suggested_reply"),replacement_text:formValue(id,"replacement_text"),notes:formValue(id,"notes")}; if((payload.action==="REPLY_AND_APPROVE"||payload.action==="REPLY_AND_CLOSE")&&!String(payload.replacement_text||payload.suggested_reply||"").trim()){showStatus("Reply text is required."); return;} submit(id,()=>apiPost(`/api/admin/email-review/${encodeURIComponent(id)}/action`,payload));}
++    if(action==="outbox-save"){const payload={body_text:formValue(id,"body_text"),body_html:formValue(id,"body_html")}; submit(id,()=>apiPost(`/api/admin/email-review/outbox/${encodeURIComponent(id)}/update`,payload));}
++    if(action==="outbox-action"){const payload={action:btn.dataset.value,body_text:formValue(id,"body_text"),body_html:formValue(id,"body_html")}; submit(id,()=>apiPost(`/api/admin/email-review/outbox/${encodeURIComponent(id)}/action`,payload));}
++  });
+ 
+-    wireHandlers();
++  statusFilter.addEventListener("change", async()=>{current().activeFilter=statusFilter.value; current().expandedId=null; clearStatus(); await loadRows();});
++  refreshBtn.addEventListener("click", ()=>{clearStatus(); loadRows().catch((e)=>showStatus(e.message));});
++  modeInboxBtn.addEventListener("click", async()=>{state.mode="inbox"; modeInboxBtn.className="btn-inline"; modeOutboxBtn.className="btn-ghost"; clearStatus(); await loadRows();});
++  modeOutboxBtn.addEventListener("click", async()=>{state.mode="outbox"; modeInboxBtn.className="btn-ghost"; modeOutboxBtn.className="btn-inline"; clearStatus(); await loadRows();});
+ 
+-    try {
+-      await loadRows();
+-    } catch (error) {
+-      showStatus(error.message || "Failed to load emails.");
+-    }
+-  });
++  window.addEventListener("DOMContentLoaded", async()=>{ if(typeof loadHeader==="function") await loadHeader(); try{await loadRows();}catch(e){showStatus(e.message||"Failed to load reviews.");}});
+ })();

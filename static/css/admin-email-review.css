@@ -1,0 +1,28 @@
+.email-review-page .admin-jump-link {
+  margin-top: 8px;
+}
+
+.email-review-page .admin-jump-link a {
+  color: #9eb0d3;
+}
+
+.email-review-page .email-body {
+  white-space: pre-wrap;
+  border: 1px solid rgba(124, 146, 196, 0.3);
+  border-radius: 10px;
+  background: rgba(8, 18, 36, 0.8);
+  color: #e7eefb;
+  padding: 10px;
+  max-height: 320px;
+  overflow: auto;
+}
+
+.email-review-page .tab-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.email-review-page #status-filter {
+  min-width: 220px;
+}

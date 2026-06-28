@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Carrier Shark - Accept Invite</title>
+
+  <link rel="stylesheet" href="/static/css/base.css" />
+  <link rel="stylesheet" href="/static/css/style1.css" />
+  <link rel="stylesheet" href="/static/css/signup.css" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+</head>
+
+<body class="carrier-list">
+  <div class="bg-gradient"></div>
+
+  <div class="auth-shell">
+    <div class="auth-card">
+      <div class="auth-header">
+        <div class="logo-row">
+          <img src="/static/img/logo-mark.svg" alt="Carrier Shark" class="logo-mark" />
+          <div class="logo-text">
+            <div class="brand">Carrier Shark</div>
+            <div class="tagline">Team Invite</div>
+          </div>
+        </div>
+      </div>
+
+      <h1 class="auth-title">Join your team</h1>
+      <p class="auth-subtitle" id="sub">Checking invite…</p>
+
+      <!-- INVITE DETAILS -->
+      <div id="invite-box" style="display:none; margin-top:14px;">
+        <div class="row-title" style="margin-bottom:6px;">Workspace</div>
+        <div class="muted" id="company-name">—</div>
+
+        <div class="row-title" style="margin-top:14px; margin-bottom:6px;">Email</div>
+        <input class="api-input" id="invite-email" type="email" readonly />
+      </div>
+
+      <!-- SIGNUP FORM (only shown if needed) -->
+      <div id="signup-box" style="display:none; margin-top:16px;">
+        <div class="row-title" style="margin-bottom:6px;">Your name</div>
+        <input class="api-input" id="name" type="text" placeholder="Full name" autocomplete="name" />
+
+        <div class="row-title" style="margin-top:14px; margin-bottom:6px;">Password</div>
+        <input class="api-input" id="password" type="password" placeholder="Create a password" autocomplete="new-password" />
+
+        <div class="row-title" style="margin-top:14px; margin-bottom:6px;">Confirm password</div>
+        <input class="api-input" id="confirm" type="password" placeholder="Confirm password" autocomplete="new-password" />
+      </div>
+
+      <div class="auth-actions" style="margin-top:18px;">
+        <button class="btn-primary" id="btn-accept" disabled>Continue</button>
+        <a class="btn-ghost" id="btn-login" href="/login" style="display:none;">Log in</a>
+      </div>
+
+      <div class="muted" id="msg" style="margin-top:14px; display:none;"></div>
+    </div>
+  </div>
+
+<script>
+(function() {
+  const token = location.pathname.split("/accept-invite/")[1] || "";
+
+  const msg = document.getElementById("msg");
+  const sub = document.getElementById("sub");
+  const btn = document.getElementById("btn-accept");
+  const loginLink = document.getElementById("btn-login");
+
+  const inviteBox = document.getElementById("invite-box");
+  const signupBox = document.getElementById("signup-box");
+  const companyNameEl = document.getElementById("company-name");
+  const inviteEmailEl = document.getElementById("invite-email");
+
+  const nameEl = document.getElementById("name");
+  const passEl = document.getElementById("password");
+  const confEl = document.getElementById("confirm");
+
+  function show(text) {
+    msg.textContent = text;
+    msg.style.display = text ? "block" : "none";
+  }
+
+  async function apiGet(url) {
+    const r = await fetch(url, { credentials: "include" });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) {
+      const e = new Error(data.error || "Request failed");
+      e.status = r.status;
+      throw e;
+    }
+    return data;
+  }
+
+  async function apiPost(url, body) {
+    const r = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(body || {})
+    });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) {
+      const e = new Error(data.error || "Request failed");
+      e.status = r.status;
+      throw e;
+    }
+    return data;
+  }
+
+  // bounce-back login link (only used when needed)
+  loginLink.href = "/login?next=" + encodeURIComponent(location.pathname);
+
+  let invite = null;
+  let needsLogin = false;
+  let needsSignup = false;
+
+  async function init() {
+    show("");
+
+    try {
+      invite = await apiGet("/api/team/invites/" + encodeURIComponent(token));
+
+      inviteBox.style.display = "block";
+      companyNameEl.textContent = invite.company_name || "—";
+      inviteEmailEl.value = invite.invited_email || "";
+
+      // default assumption: user not logged in -> we show signup form
+      // but we can detect "already has account" only when they submit.
+      needsSignup = true;
+      signupBox.style.display = "block";
+
+      sub.textContent = "Create your account to join " + (invite.company_name || "the workspace") + ".";
+      btn.textContent = "Create account & join";
+      btn.disabled = false;
+
+    } catch (e) {
+      console.error(e);
+
+      if (e.status === 410) {
+        sub.textContent = "Invite expired.";
+        show("Ask your teammate to resend the invite.");
+      } else if (e.status === 409) {
+        sub.textContent = "Invite not valid.";
+        show(e.message || "This invite can’t be used.");
+      } else if (e.status === 404) {
+        sub.textContent = "Invite not found.";
+        show("Double-check the link, or ask your teammate to resend.");
+      } else {
+        sub.textContent = "Could not load invite.";
+        show(e.message || "Something went wrong.");
+      }
+
+      btn.disabled = true;
+    }
+  }
+
+  btn.addEventListener("click", async () => {
+    show("");
+    btn.disabled = true;
+    const oldText = btn.textContent;
+    btn.textContent = "Working…";
+
+    try {
+      const payload = { token };
+
+      // If signup box is visible, include fields
+      if (signupBox.style.display !== "none") {
+        payload.name = (nameEl.value || "").trim();
+        payload.password = passEl.value || "";
+        payload.confirm_password = confEl.value || "";
+      }
+
+      const data = await apiPost("/api/team/invites/accept-and-signup", payload);
+
+      sub.textContent = "Welcome.";
+      show("Taking you into your workspace…");
+
+      setTimeout(() => {
+        window.location.href = (data.redirect || "/account?tab=team");
+      }, 350);
+
+    } catch (e) {
+      console.error(e);
+
+      // If account already exists -> force login instead of signup here
+      if (e.status === 409 && String(e.message || "").toLowerCase().includes("already exists")) {
+        signupBox.style.display = "none";
+        loginLink.style.display = "inline-flex";
+
+        sub.textContent = "Log in to accept the invite.";
+        show("An account with this email already exists. Log in, then click Continue again.");
+        btn.textContent = "Continue";
+        btn.disabled = false;
+        return;
+      }
+
+      if (e.status === 401) {
+        loginLink.style.display = "inline-flex";
+        sub.textContent = "Log in to accept the invite.";
+        show("Please log in with the invited email, then try again.");
+      } else if (e.status === 410) {
+        sub.textContent = "Invite expired.";
+        show("Ask your teammate to resend the invite.");
+      } else if (e.status === 403) {
+        sub.textContent = "Wrong account.";
+        show(e.message || "This invite belongs to a different email.");
+      } else {
+        sub.textContent = "Could not continue.";
+        show(e.message || "Something went wrong.");
+      }
+
+      btn.textContent = oldText;
+      btn.disabled = false;
+    }
+  });
+
+  init();
+})();
+</script>
+
+</body>
+</html>

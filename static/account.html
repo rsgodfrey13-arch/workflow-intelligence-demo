@@ -1,0 +1,1154 @@
+<!-- /public/account (or /profile) .-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account</title>
+<link rel="stylesheet" href="/static/css/base.css">
+<link rel="stylesheet" href="/static/css/profile_style.css">
+<link rel="stylesheet" href="/static/css/account.css">
+<link rel="stylesheet" href="/static/css/style1.css" />
+<link rel="stylesheet" href="/static/css/plans.css" />
+<link rel="stylesheet" href="/static/css/activate-plan.css" />
+<link rel="stylesheet" href="/static/css/account-plan.css" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+</head>
+
+
+  
+<body class="account-page">
+  <div class="bg-gradient"></div>
+  <div class="bg-grid"></div>
+  <div id="site-header"></div>  
+  <div class="page">
+
+    <header class="account-header cs-page-header">
+      <div>
+        <h1 class="page-title">My Account</h1>
+        <p class="page-subtitle">Manage alerts, agreements, API access, and your plan.</p>
+      </div>
+
+      <div class="account-header-actions action-bar">
+        <button
+          class="btn-ghost"
+          data-tab-jump="help"
+        >
+          Help
+        </button>
+        <button id="btn-signout" class="btn-ghost">Sign out</button>
+      </div>
+    </header>
+
+    <div class="account-mobile-nav" aria-label="Account section navigation">
+      <button
+        type="button"
+        class="account-mobile-toggle"
+        id="account-sections-toggle"
+        aria-expanded="false"
+        aria-controls="account-sections-panel"
+      >
+        <span>Account Sections</span>
+        <span class="account-mobile-toggle-icon" aria-hidden="true">▾</span>
+      </button>
+
+      <div class="account-mobile-panel" id="account-sections-panel" hidden>
+        <button class="rail-item is-active" data-tab="overview">
+          <span class="rail-dot"></span>
+          Overview
+        </button>
+        <button class="rail-item" data-tab="team">
+          <span class="rail-dot"></span>
+          Teammates
+        </button>
+        <button class="rail-item" data-tab="alerts">
+          <span class="rail-dot"></span>
+          Email Alerts
+        </button>
+        <button class="rail-item" data-tab="agreements">
+          <span class="rail-dot"></span>
+          Agreements
+        </button>
+        <button class="rail-item" data-tab="screening">
+          <span class="rail-dot"></span>
+          Screening
+        </button>
+        <button class="rail-item" data-tab="api">
+          <span class="rail-dot"></span>
+          API
+        </button>
+        <button class="rail-item" data-tab="plan">
+          <span class="rail-dot"></span>
+          Plan
+        </button>
+        <button class="rail-item" data-tab="billing">
+          <span class="rail-dot"></span>
+          Billing
+        </button>
+        <button class="rail-item" data-tab="security">
+          <span class="rail-dot"></span>
+          Security
+        </button>
+        <button class="rail-item" data-tab="help">
+          <span class="rail-dot"></span>
+          Help & Support
+        </button>
+      </div>
+    </div>
+
+    <div class="account-shell">
+      <!-- LEFT NAV -->
+      <aside class="account-rail">
+        <button class="rail-item is-active" data-tab="overview">
+          <span class="rail-dot"></span>
+          Overview
+        </button>
+        <button class="rail-item" data-tab="team">
+          <span class="rail-dot"></span>
+          Teammates
+        </button>
+        <button class="rail-item" data-tab="alerts">
+          <span class="rail-dot"></span>
+          Email Alerts
+        </button>
+        <button class="rail-item" data-tab="agreements">
+          <span class="rail-dot"></span>
+          Agreements
+        </button>
+        <button class="rail-item" data-tab="screening">
+          <span class="rail-dot"></span>
+          Screening
+        </button>
+        <button class="rail-item" data-tab="api">
+          <span class="rail-dot"></span>
+          API
+        </button>
+        <button class="rail-item" data-tab="plan">
+          <span class="rail-dot"></span>
+          Plan
+        </button>
+        <button class="rail-item" data-tab="billing">
+          <span class="rail-dot"></span>
+          Billing
+        </button>
+        <button class="rail-item" data-tab="security">
+          <span class="rail-dot"></span>
+          Security
+        </button>
+                <button class="rail-item" data-tab="help">
+          <span class="rail-dot"></span>
+          Help & Support
+        </button>
+      </aside>
+
+      <!-- RIGHT CONTENT -->
+      <main class="account-panel">
+        <!-- OVERVIEW -->
+        <section class="tab-panel is-active" id="tab-overview">
+          <div class="card">
+            <div class="card-head card-header">
+              <h2>Account Snapshot</h2>
+              <span class="badge" id="plan-badge">—</span>
+            </div>
+
+            <div class="kv-grid">
+              <div class="kv">
+                <div class="kv-label">Name</div>
+                <div class="kv-value" id="me-name">—</div>
+              </div>
+              <div class="kv">
+                <div class="kv-label">Email</div>
+                <div class="kv-value" id="me-email">—</div>
+              </div>
+              <div class="kv">
+                <div class="kv-label">Company</div>
+                <div class="kv-value" id="me-company">—</div>
+              </div>
+              <div class="kv">
+                <div class="kv-label">Alerts</div>
+                <div class="kv-value">
+                  <div class="pill-row" id="alerts-pills">
+                    <span class="status-pill is-off" id="me-email_alerts">Email</span>
+                    <span class="status-pill is-off" id="me-rest_alerts">REST</span>
+                    <span class="status-pill is-off" id="me-webhook_alerts">Webhook</span>
+                  </div>
+                </div>
+              </div>
+            <div class="kv">
+              <div class="kv-label">Plan</div>
+              <div class="kv-value kv-inline">
+                <span id="account-plan">—</span>
+                <button class="link-btn" type="button" data-tab-jump="plan">
+                  Manage
+                </button>
+              </div>
+            </div>
+            <div class="kv">
+              <div class="kv-label">Password</div>
+              <div class="kv-value kv-inline">
+                <span class="kv-mask">••••••••</span>
+                <button class="link-btn" type="button" data-tab-jump="security">
+                  Manage
+                </button>
+              </div>
+            </div>
+            </div>
+          </div>
+
+          <!-- USAGE -->
+          <div class="card" id="usage-card" style="display:none;">
+            <div class="card-head card-header">
+              <div>
+                <h2>Usage</h2>
+                <p class="muted" id="credits-subtext">Carriers monitored.</p>
+              </div>
+          
+              <span class="badge" id="credits-badge">—</span>
+            </div>
+          
+            <div class="usage-grid">
+              <div class="usage-metric">
+                <div class="kv-label">Carriers monitored</div>
+                <div class="usage-value">
+                  <span id="credits-used">—</span>
+                  <span class="usage-dim">/</span>
+                  <span id="credits-limit">—</span>
+                </div>
+              </div>
+          
+            </div>
+          
+            <div class="usage-bar" aria-label="Credits usage">
+              <div class="usage-bar-fill" id="credits-bar" style="width:0%;"></div>
+            </div>
+          
+            <div class="usage-footer">
+              <div class="muted" id="credits-footnote">—</div>
+              <button class="link-btn" type="button" data-tab-jump="plan">
+                Manage plan
+              </button>
+            </div>
+          </div>
+
+
+        </section>
+
+        <!-- TEAM -->
+        <section class="tab-panel" id="tab-team">
+          <div class="card">
+            <div class="card-head card-header">
+              <h2>Teammates</h2>
+              <p class="muted">Invite teammates to your workspace and manage access.</p>
+            </div>
+        
+            <div class="row team-invite-row">
+              <div class="team-invite-email-col">
+                <div class="row-title" style="margin-bottom:6px;">Invite by email</div>
+                <input id="team-invite-email" class="api-input" type="email" placeholder="name@company.com" />
+              </div>
+        
+              <div class="team-invite-role-col">
+                <div class="row-title" style="margin-bottom:6px;">Role</div>
+                <select id="team-invite-role" class="api-input">
+                  <option value="MEMBER">Member</option>
+                  <option value="ADMIN">Admin</option>
+                </select>
+              </div>
+        
+              <div class="row-actions">
+                <button class="btn-primary" id="btn-team-invite">Send invite</button>
+              </div>
+            </div>
+        
+            <div class="divider"></div>
+        
+            <div class="row team-section-head-row">
+              <div>
+                <div class="row-title">Members</div>
+                <div class="row-sub">Active users in this workspace.</div>
+              </div>
+              <button class="btn-ghost" id="btn-team-refresh">Refresh</button>
+            </div>
+        
+            <div id="team-members" class="muted">Loading…</div>
+        
+            <div class="divider"></div>
+        
+            <div class="row team-section-head-row">
+              <div>
+                <div class="row-title">Pending invites</div>
+                <div class="row-sub">Invites not accepted yet.</div>
+              </div>
+            </div>
+        
+            <div id="team-invites" class="muted">Loading…</div>
+        
+            <div class="muted" id="team-msg" style="margin-top:10px; display:none;"></div>
+          </div>
+        </section>
+
+        <!-- ALERTS -->
+        <section class="tab-panel" id="tab-alerts">
+          <div class="card">
+            <div class="card-head card-header">
+              <h2>Email Alerts</h2>
+              <p class="muted">Set global delivery preferences. Carrier-specific alert switches live on the carrier profile.</p>
+            </div>
+            <!-- EMAIL ALERTS LOCK OVERLAY -->
+            <div class="alerts-lock-overlay" id="email-alerts-locked" style="display:none;">
+              <div class="alerts-lock-content">
+                <div class="alerts-lock-title">Email alerts aren’t enabled</div>
+                <div class="alerts-lock-sub">
+                  Upgrade your plan to receive carrier alerts by email.
+                </div>
+                <button
+                  class="btn-primary"
+                  type="button"
+                  data-tab-jump="plan"
+                >
+                  Upgrade your plan
+                </button>
+              </div>
+            </div>
+            <div class="row">
+              <div>
+                <div class="row-title">Alerts Master Switch</div>
+                <div class="row-sub">If off, you won’t receive any carrier alerts by email.</div>
+              </div>
+            
+              <!-- RIGHT SIDE: switch + (optional) status text underneath -->
+              <div class="alerts-switch-wrap is-off">
+                <label class="switch">
+                  <input type="checkbox" id="alerts-enabled">
+                  <span class="switch-ui"></span>
+                </label>
+            
+                <!-- IMPORTANT: leave blank in HTML -->
+                <div class="alerts-footer-status" id="alerts-footer-status"></div>
+              </div>
+            </div>
+
+            
+            <div class="divider"></div>
+
+<div class="categories-header save-row save-row--top">
+  <h3 class="section-h3">Categories</h3>
+
+  <div class="save-row__actions">
+    <button
+      class="btn-primary btn-save-inline"
+      id="btn-save-alert-fields-top"
+      disabled
+    >
+      Save changes
+    </button>
+    <span id="email-save-status" class="save-status" aria-live="polite"></span>
+  </div>
+</div>
+
+
+            <div id="email-alert-fields">
+              <!-- JS will render grouped categories + toggles here -->
+            </div>
+            
+            <div class="save-row save-row--bottom save-row--separated">
+              <div class="save-row__actions">
+                <button class="btn-primary" id="btn-save-alert-fields" disabled>Save changes</button>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- AGREEMENTS -->
+        <section class="tab-panel" id="tab-agreements">
+          <div class="card">
+            <div class="card-head card-header">
+              <h2>Agreements</h2>
+              <p class="muted">Pick your default agreement and manage templates.</p>
+            </div>
+
+            <div class="row save-row save-row--inline">
+              <div class="save-row__actions save-row__actions--wrap">
+                <button class="btn-primary" id="btn-upload-agreement">Upload Agreement</button>
+                <button class="btn-primary" id="btn-set-default">Set default</button>
+                <button class="btn-primary" id="btn-save-agreement-requirements" disabled>Save requirements</button>
+                <span id="agreements-save-status" class="save-status" aria-live="polite"></span>
+              </div>
+            </div>
+
+            <div id="agreement-requirements" class="toggle-grid" style="margin-top:10px; margin-bottom:4px;"></div>
+
+            <div class="divider"></div>
+
+            <div class="agreements-grid" id="agreements-grid">
+              <div class="muted">Loading…</div>
+            </div>
+            
+          </div>
+        </section>
+
+
+        <!-- SCREENING -->
+        <section class="tab-panel" id="tab-screening">
+          <div class="card">
+            <div class="card-head card-header">
+              <div>
+                <h2>Screening</h2>
+                <p class="muted">Configure carrier screening profiles and choose which one is used by default.</p>
+              </div>
+            </div>
+
+            <div class="row screening-header-row">
+              <div>
+                <div class="row-title">Screening Profiles</div>
+                <div class="row-sub">Choose a default screening profile and configure the criteria that determine carrier status.</div>
+              </div>
+              <div class="row-actions screening-profile-actions">
+                <button class="btn-primary" id="btn-screening-new-profile">New Profile</button>
+                <button class="btn-ghost" id="btn-screening-rename-profile">Rename Profile</button>
+                <button class="btn-ghost" id="btn-screening-delete-profile">Delete Profile</button>
+                <button class="btn-ghost" id="btn-screening-set-default">Set Default</button>
+              </div>
+            </div>
+
+            <div id="screening-profiles-list" class="screening-profiles-list">
+              <div class="muted">Loading profiles…</div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="save-row save-row--top">
+              <div class="save-row__actions">
+                <button class="btn-primary" id="btn-screening-save-top" disabled>Save Changes</button>
+                <span id="screening-save-status" class="save-status" aria-live="polite"></span>
+              </div>
+            </div>
+
+            <div class="screening-groups-wrap">
+              <div class="row screening-groups-head">
+                <div>
+                  <div class="row-title">Rule Groups</div>
+                  <div class="row-sub">Create a group, choose how it matches, then assign rules to it.</div>
+                </div>
+                <div class="row-actions">
+                  <button class="btn-ghost" id="btn-screening-new-group">New Group</button>
+                </div>
+              </div>
+              <div id="screening-groups-list" class="screening-groups-list">
+                <div class="muted">Select a screening profile to configure rule groups.</div>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="screening-criteria-wrap">
+              <div class="row-title">Screening Criteria</div>
+              <div id="screening-criteria-list" class="screening-criteria-list">
+                <div class="muted">Select a screening profile to configure criteria.</div>
+              </div>
+            </div>
+
+            <div class="save-row save-row--bottom save-row--separated">
+              <div class="save-row__actions">
+                <button class="btn-primary" id="btn-screening-save" disabled>Save Changes</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- API -->
+        <section class="tab-panel" id="tab-api">
+          <div class="card">
+            <div class="card-head card-header">
+              <h2>API</h2>
+              <p class="muted">Everything you need to integrate Carrier Shark into your workflow.</p>
+            </div>
+
+            <div class="row lock-wrap" id="api-key-row">
+              <div class="lock-main">
+                <div class="row-title">API Key</div>
+                <div class="row-sub" id="api-key-masked">—</div>
+              </div>
+            
+              <div class="row-actions">
+                <button class="btn-ghost" id="btn-copy-key">Copy</button>
+                <button class="btn-primary" id="btn-rotate-key">Rotate</button>
+              </div>
+            
+              <div class="lock-footer" id="api-key-locked" style="display:none;">
+                <span class="lock-dot"></span>
+                <span>
+                  Upgrade required. API access isn’t enabled on your plan.
+                  <button class="link-btn" type="button" data-tab-jump="plan">
+                    Upgrade your plan
+                  </button>
+                </span>
+              </div>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="row lock-wrap" id="webhook-row">
+              <div class="lock-main">
+                <div class="row-title">Webhook URL</div>
+                <input
+                  id="webhook-url"
+                  type="url"
+                  class="api-input"
+                  placeholder="https://example.com/webhooks/carrier-shark"
+                />
+              </div>
+            
+              <div class="row-actions">
+                <button class="btn-ghost" id="btn-save-webhook" disabled>
+                  Save
+                </button>
+              </div>
+            
+              <div class="lock-footer" id="webhook-locked" style="display:none;">
+                <span class="lock-dot"></span>
+                <span>
+                  Upgrade required. Webhooks aren’t enabled on your plan.
+                  <button class="link-btn" type="button" data-tab-jump="plan">
+                    Upgrade your plan
+                  </button>
+                </span>
+              </div>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="row lock-wrap" id="docs-row">
+              <div class="lock-main">
+                <div class="row-title">Documentation</div>
+                <div class="row-sub">
+                  Auth, endpoints, examples, error formats.
+                </div>
+              </div>
+            
+              <div class="row-actions">
+                <button class="btn-primary" id="btn-openapi-spec">
+                  Open API spec
+                </button>
+              </div>
+            
+              <div class="lock-footer" id="docs-locked" style="display:none;">
+                <span class="lock-dot"></span>
+                <span>
+                  Upgrade required. Enable API access to view documentation.
+                  <button class="link-btn" type="button" data-tab-jump="plan">
+                    Upgrade your plan
+                  </button>
+                </span>
+              </div>
+            </div>
+
+            </div> 
+            </section> 
+
+        <!-- PLAN -->
+        <section class="tab-panel" id="tab-plan">
+          <div class="card">
+            <div class="card-head card-header">
+              <h2>Plan</h2>
+              <p class="muted">Upgrade when you’re ready. No nonsense.</p>
+            </div>
+
+<form method="get" action="/activate-plan" class="account-plan-form">
+  <input type="hidden" id="selected-plan" name="plan" value="" />
+  <input type="hidden" id="billing-context" name="context" value="upgrade" />
+
+  <div class="account-plan-topline">
+    <div class="muted" style="margin:0;">
+      Select a plan. You’ll confirm billing on the next step.
+    </div>
+    <span class="badge" id="current-plan-badge">Current: —</span>
+  </div>
+
+<div class="plans-table-wrap" role="region" aria-label="Plan comparison table" tabindex="0">
+  <table class="plans-table">
+    <thead>
+      <tr>
+        <th scope="col" class="plans-col-feature"></th>
+
+        <!-- CORE -->
+        <th scope="col" class="plans-col-plan selectable" data-plan-col="core">
+          <div class="plan-head">
+            <span class="plan-radio" aria-hidden="true"></span>
+            <div class="plan-name">Core</div>
+            <div class="plan-price">$199 <span>/ month</span></div>
+
+            <div class="plan-state" data-plan-state="core"></div>
+
+            <button type="button" class="plan-select-btn" data-plan-btn="core">
+              Select
+            </button>
+          </div>
+        </th>
+
+        <!-- PRO -->
+        <th scope="col" class="plans-col-plan is-featured selectable" data-plan-col="pro">
+          <div class="plan-head">
+            <div class="plan-badge">Best value</div>
+            <span class="plan-radio" aria-hidden="true"></span>
+            <div class="plan-name">Pro</div>
+            <div class="plan-price">$399 <span>/ month</span></div>
+
+            <div class="plan-state" data-plan-state="pro"></div>
+
+            <button type="button" class="plan-select-btn" data-plan-btn="pro">
+              Select
+            </button>
+          </div>
+        </th>
+
+        <!-- ENTERPRISE -->
+        <th scope="col" class="plans-col-plan selectable" data-plan-col="enterprise">
+          <div class="plan-head">
+            <span class="plan-radio" aria-hidden="true"></span>
+            <div class="plan-name">Enterprise</div>
+            <div class="plan-price">$1,499 <span>/ month</span></div>
+
+            <div class="plan-state" data-plan-state="enterprise"></div>
+
+            <button type="button" class="plan-select-btn" data-plan-btn="enterprise">
+              Select
+            </button>
+          </div>
+        </th>
+      </tr>
+    </thead>
+
+<tbody>
+  <tr>
+    <th scope="row">Carrier Search &amp; Aggregation</th>
+    <td data-plan-col="core"><span class="check">✓</span> Unlimited</td>
+    <td class="is-featured" data-plan-col="pro"><span class="check">✓</span> Unlimited</td>
+    <td data-plan-col="enterprise"><span class="check">✓</span> Unlimited</td>
+  </tr>
+
+  <tr>
+    <th scope="row">Saved Carriers</th>
+    <td data-plan-col="core"><span class="check">✓</span> Unlimited</td>
+    <td class="is-featured" data-plan-col="pro"><span class="check">✓</span> Unlimited</td>
+    <td data-plan-col="enterprise"><span class="check">✓</span> Unlimited</td>
+  </tr>
+
+  <tr>
+    <th scope="row">Carrier Monitoring</th>
+    <td data-plan-col="core">Up to 500 monitored carriers</td>
+    <td class="is-featured" data-plan-col="pro">Up to 2,000 monitored carriers (expandable)</td>
+    <td data-plan-col="enterprise">50,000+ monitored carriers (expandable)</td>
+  </tr>
+
+  <tr>
+    <th scope="row">Contract Sending</th>
+    <td class="muted" data-plan-col="core">—</td>
+    <td class="is-featured" data-plan-col="pro"><span class="check">✓</span> Included</td>
+    <td data-plan-col="enterprise"><span class="check">✓</span> Included</td>
+  </tr>
+
+  <tr>
+    <th scope="row">Email Alerts</th>
+    <td data-plan-col="core"><span class="check">✓</span> Standard alerts</td>
+    <td class="is-featured" data-plan-col="pro"><span class="check">✓</span> Advanced configurable alerts</td>
+    <td data-plan-col="enterprise"><span class="check">✓</span> Advanced configurable alerts</td>
+  </tr>
+
+  <tr>
+    <th scope="row">Custom Carrier Screening</th>
+    <td data-plan-col="core"><span class="check">✓</span> Included</td>
+    <td class="is-featured" data-plan-col="pro"><span class="check">✓</span> Included</td>
+    <td data-plan-col="enterprise"><span class="check">✓</span> Included</td>
+  </tr>
+
+  <tr>
+    <th scope="row">API Access</th>
+    <td class="muted" data-plan-col="core">—</td>
+    <td class="is-featured" data-plan-col="pro"><span class="check">✓</span> Full API access</td>
+    <td data-plan-col="enterprise"><span class="check">✓</span> Full API access</td>
+  </tr>
+
+  <tr>
+    <th scope="row">Webhooks</th>
+    <td class="muted" data-plan-col="core">—</td>
+    <td class="is-featured" data-plan-col="pro"><span class="check">✓</span> Included</td>
+    <td data-plan-col="enterprise"><span class="check">✓</span> Included</td>
+  </tr>
+
+  <tr>
+    <th scope="row">Team Seats</th>
+    <td data-plan-col="core">Up to 3 users</td>
+    <td class="is-featured" data-plan-col="pro">Up to 10 users (expandable)</td>
+    <td data-plan-col="enterprise">Custom user scaling</td>
+  </tr>
+
+  <tr>
+    <th scope="row">Document Storage</th>
+    <td class="muted" data-plan-col="core">—</td>
+    <td class="is-featured" data-plan-col="pro"><span class="check">✓</span> Included</td>
+    <td data-plan-col="enterprise"><span class="check">✓</span> Included</td>
+  </tr>
+
+  <tr>
+    <th scope="row">Priority Support</th>
+    <td data-plan-col="core">Standard email support</td>
+    <td class="is-featured" data-plan-col="pro">Standard email support</td>
+    <td data-plan-col="enterprise">Priority support</td>
+  </tr>
+
+  <tr>
+    <th scope="row">Onboarding</th>
+    <td class="muted" data-plan-col="core">—</td>
+    <td class="is-featured" data-plan-col="pro">Available + onboarding support</td>
+    <td data-plan-col="enterprise">Available + onboarding support</td>
+  </tr>
+
+  <tr class="bestfor-row">
+    <th scope="row">Best For</th>
+    <td data-plan-col="core">Small to growing broker teams</td>
+    <td class="is-featured" data-plan-col="pro">Operationally mature broker teams</td>
+    <td data-plan-col="enterprise">National &amp; multi-branch brokerages</td>
+  </tr>
+</tbody>
+
+  </table>
+</div>
+
+
+<div class="plan-actions">
+  <a class="cs-btn cs-btn-ghost" href="/activate-plan">Back</a>
+
+  <div class="plan-cta-wrap">
+    <button id="continue-btn" class="cs-btn cs-btn-primary" type="submit" disabled>
+      Current Plan
+    </button>
+
+    <div class="cs-upgrade-helper" id="stripe-helper" style="display:none;">
+      Stripe will open. Click <strong>Update subscription</strong> to confirm.
+    </div>
+  </div>
+</div>
+<div class="cs-fineprint" style="margin-top:12px;">
+  <span>Changes take effect immediately after billing.</span>
+</div>
+</form>
+
+          </div>
+        </section>
+
+
+<!-- BILLING -->
+<section class="tab-panel" id="tab-billing">
+  <div class="card">
+    <div class="card-head">
+      <h2>Billing</h2>
+      <p class="muted">Manage payment method, invoices, and subscription settings.</p>
+    </div>
+
+    <!-- BILLING LOCK OVERLAY -->
+    <div class="alerts-lock-overlay" id="billing-locked" style="display:none;">
+      <div class="alerts-lock-content">
+        <div class="alerts-lock-title">Billing tools unlock on paid plans</div>
+        <div class="alerts-lock-sub">
+          Starter includes access to Carrier Shark, but Stripe billing management,
+          invoices, and subscription controls are available once you move to a paid plan.
+        </div>
+        <button
+          class="btn-primary"
+          type="button"
+          data-tab-jump="plan"
+        >
+          Upgrade your plan
+        </button>
+      </div>
+    </div>
+
+    <div class="kv-grid">
+      <div class="kv">
+        <div class="kv-label">Plan</div>
+        <div class="kv-value" id="billing-plan">—</div>
+      </div>
+
+      <div class="kv">
+        <div class="kv-label">Status</div>
+        <div class="kv-value" id="billing-status">—</div>
+      </div>
+
+      <div class="kv">
+        <div class="kv-label">Next renewal</div>
+        <div class="kv-value" id="billing-next-renewal">—</div>
+      </div>
+
+      <div class="kv" id="billing-cancel-row" style="display:none;">
+        <div class="kv-label">Subscription ending</div>
+        <div class="kv-value">
+          <span id="billing-cancel-text" class="billing-ending-text"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="row">
+      <div class="row-main">
+        <div class="row-title">Manage billing in Stripe</div>
+        <div class="row-sub">
+          Update card, download invoices, cancel, or change billing details.
+        </div>
+      </div>
+
+      <div class="row-actions">
+        <button class="btn-primary" id="btn-manage-billing">
+          Manage billing
+        </button>
+      </div>
+    </div>
+
+    <div class="muted" style="margin-top:12px;">
+      Payments are processed by Stripe. We never store card details.
+    </div>
+  </div>
+</section>
+        
+        <!-- SECURITY -->
+        <section class="tab-panel" id="tab-security">
+          <div class="card">
+            <div class="card-head card-header">
+              <h2>Security</h2>
+              <p class="muted">Keep your account tight.</p>
+            </div>
+
+            <div class="row">
+              <div>
+                <div class="row-title">Password</div>
+                <div class="row-sub">Change your password anytime.</div>
+              </div>
+              <button class="btn-primary" id="btn-change-password">Change</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- HELP -->
+        <section class="tab-panel" id="tab-help">
+          <div class="card">
+            <div class="card-head card-header">
+              <h2>Help & Support</h2>
+              <p class="muted">Get help fast. Keep moving.</p>
+            </div>
+        
+            <!-- quick actions row -->
+            <div class="row">
+              <div>
+                <div class="row-title">Contact Support</div>
+                <div class="row-sub">Send a message to the team.</div>
+              </div>
+      <!--        <div class="row-actions">
+                <button class="btn-ghost" id="btn-help-faq" type="button">FAQ</button>
+                <button class="btn-primary" id="btn-help-contact" type="button">Contact</button>
+              </div> -->
+            </div>
+        
+            <div class="divider"></div>
+        
+            <!-- help shell -->
+<div class="help-grid">
+  <!-- LEFT: form -->
+  <div class="help-card">
+    <div class="help-card-title">Message</div>
+    <div class="muted" style="margin-top:6px;">We typically reply within 1 business day.</div>
+
+    <div class="help-form">
+      <div class="field">
+        <label class="field-label" for="help-contact-email">Contact email</label>
+        <input class="field-input" id="help-contact-email" type="email" placeholder="you@company.com" />
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="help-contact-phone">Contact phone (optional)</label>
+        <input class="field-input" id="help-contact-phone" type="tel" placeholder="(555) 555-5555" />
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="help-subject">Subject</label>
+        <input class="field-input" id="help-subject" type="text" placeholder="What can we help with?" />
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="help-message">Message</label>
+        <textarea class="field-input help-textarea" id="help-message" rows="7"
+          placeholder="Include any details that help us solve this quickly."></textarea>
+      </div>
+
+      <div class="help-actions-row">
+        <div class="help-footer-note">
+          <span class="help-dot"></span>
+          <span>
+            <strong>Support will reach out</strong> via your contact info · typically within 1 business day
+          </span>
+        </div>
+      
+        <button class="btn-primary" id="btn-help-send" type="button" disabled>
+          Send
+        </button>
+      </div>
+      
+      <div class="form-error" id="help-error" style="display:none;"></div>
+      <div class="form-ok" id="help-ok" style="display:none;"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: what happens next + tickets -->
+  <div class="help-side">
+    <div class="help-card">
+      <div class="help-card-title">Your tickets</div>
+      <div class="muted" style="margin-top:6px;">Recent requests from this account.</div>
+
+      <div class="ticket-list" id="ticket-list">
+        <div class="muted">Loading…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+        </section>
+
+
+      </main>
+    </div>
+</div>
+
+<div id="agreement-upload-modal" class="cs-modal-backdrop" hidden>
+  <div class="cs-modal glass-card" role="dialog" aria-modal="true" aria-labelledby="agreement-upload-title">
+    <div class="cs-modal-header">
+      <div class="cs-modal-headings">
+        <div id="agreement-upload-title" class="cs-modal-title">Upload Master Agreement</div>
+        <div class="cs-modal-subtitle">Upload a reusable master agreement PDF for your account’s contract workflow.</div>
+      </div>
+      <button id="agreement-upload-close" class="cs-modal-x" type="button" aria-label="Close">×</button>
+    </div>
+
+    <form id="agreement-upload-form" class="cs-modal-body docs-upload-form">
+      <div class="cs-row cs-row-col">
+        <label class="cs-label" for="agreement-upload-name">Agreement Name</label>
+        <input
+          id="agreement-upload-name"
+          class="cs-input"
+          type="text"
+          maxlength="120"
+          autocomplete="off"
+          placeholder="e.g., 2026 Master Carrier Agreement"
+        >
+        <div class="cs-hint">Optional · leave blank to use a clean filename-based title.</div>
+      </div>
+
+      <div class="cs-divider"></div>
+
+      <div class="cs-row cs-row-col">
+        <label class="cs-label" for="agreement-upload-file">Agreement PDF</label>
+
+        <label class="agreement-file-picker" id="agreement-file-picker" for="agreement-upload-file">
+          <input
+            id="agreement-upload-file"
+            class="agreement-file-input"
+            type="file"
+            accept=".pdf,application/pdf"
+            required
+          >
+
+          <div class="agreement-file-picker-main">
+            <span class="agreement-file-pill" id="agreement-file-pill">Choose PDF</span>
+            <span class="agreement-file-name" id="agreement-file-name">No file selected</span>
+          </div>
+
+          <div class="cs-hint">PDF only. Max file size 15MB.</div>
+        </label>
+      </div>
+
+      <div id="agreement-upload-error" class="docs-upload-error" hidden></div>
+    </form>
+
+    <div class="cs-modal-footer">
+      <div class="cs-footer-left">
+        <div class="cs-hint">PDF only • up to 5 agreements per account</div>
+      </div>
+      <div class="cs-footer-right">
+        <button id="agreement-upload-cancel" class="cs-btn cs-btn-ghost" type="button">Cancel</button>
+        <button id="agreement-upload-submit" class="cs-btn cs-btn-primary" type="button">Upload Agreement</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="agreement-delete-modal" class="cs-modal-backdrop" hidden>
+  <div class="cs-modal glass-card" role="dialog" aria-modal="true" aria-labelledby="agreement-delete-title">
+    <div class="cs-modal-header">
+      <div class="cs-modal-headings">
+        <div id="agreement-delete-title" class="cs-modal-title">Delete Agreement</div>
+        <div class="cs-modal-subtitle">Are you sure you want to remove this agreement from your template library?<br>Existing signed/sent contracts will not be affected.</div>
+      </div>
+      <button id="agreement-delete-close" class="cs-modal-x" type="button" aria-label="Close">×</button>
+    </div>
+
+    <div class="cs-modal-body">
+      <div class="cs-row cs-row-col">
+        <div class="cs-label">Agreement Name</div>
+        <div id="agreement-delete-target" class="agreement-delete-target" role="status" aria-live="polite"></div>
+      </div>
+      <div id="agreement-delete-error" class="docs-upload-error" hidden></div>
+    </div>
+
+    <div class="cs-modal-footer">
+      <div class="cs-footer-right">
+        <button id="agreement-delete-cancel" class="cs-btn cs-btn-ghost" type="button">Cancel</button>
+        <button id="agreement-delete-confirm" class="cs-btn cs-btn-primary agreement-delete-confirm-btn" type="button">Delete Agreement</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal-backdrop" id="pw-modal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pw-title">
+    <div class="modal-head">
+      <h3 id="pw-title">Change password</h3>
+      <button class="icon-btn" type="button" id="pw-close" aria-label="Close">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="field">
+        <label class="field-label" for="pw-current">Current password</label>
+        <input class="field-input" id="pw-current" type="password" autocomplete="current-password" />
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="pw-new">New password</label>
+        <input class="field-input" id="pw-new" type="password" autocomplete="new-password" />
+        <div class="muted" style="margin-top:6px;">Minimum 8 characters.</div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="pw-confirm">Confirm new password</label>
+        <input class="field-input" id="pw-confirm" type="password" autocomplete="new-password" />
+      </div>
+
+      <div class="form-error" id="pw-error" style="display:none;"></div>
+      <div class="form-ok" id="pw-ok" style="display:none;"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-ghost" type="button" id="pw-cancel">Cancel</button>
+      <button class="btn-primary" type="button" id="pw-save">Update password</button>
+    </div>
+  </div>
+</div>
+
+<div id="screening-group-modal" class="cs-modal-backdrop" hidden>
+  <div class="cs-modal glass-card" role="dialog" aria-modal="true" aria-labelledby="screening-group-modal-title">
+    <div class="cs-modal-header">
+      <div class="cs-modal-headings">
+        <div id="screening-group-modal-title" class="cs-modal-title">New Rule Group</div>
+        <div class="cs-modal-subtitle">Name the group and choose how its assigned rules should match.</div>
+      </div>
+      <button id="screening-group-modal-close" class="cs-modal-x" type="button" aria-label="Close">×</button>
+    </div>
+
+    <form id="screening-group-modal-form" class="cs-modal-body screening-group-modal-form">
+      <label class="field">
+        <span class="field-label">Group Name</span>
+        <input id="screening-group-name" class="api-input" type="text" maxlength="120" required placeholder="e.g., Safety Priorities">
+      </label>
+
+      <label class="field">
+        <span class="field-label">Match Type</span>
+        <select id="screening-group-match-type" class="api-input screening-select">
+          <option value="ALL">All of these</option>
+          <option value="ANY">Any of these</option>
+        </select>
+      </label>
+
+      <div id="screening-group-modal-error" class="error-text" hidden></div>
+    </form>
+
+    <div class="cs-modal-footer">
+      <button id="screening-group-modal-cancel" class="btn-ghost" type="button">Cancel</button>
+      <button id="screening-group-modal-submit" class="btn-primary" type="submit" form="screening-group-modal-form">Create Group</button>
+    </div>
+  </div>
+</div>
+
+<div id="screening-group-rename-modal" class="cs-modal-backdrop" hidden>
+  <div class="cs-modal glass-card" role="dialog" aria-modal="true" aria-labelledby="screening-group-rename-modal-title">
+    <div class="cs-modal-header">
+      <div class="cs-modal-headings">
+        <div id="screening-group-rename-modal-title" class="cs-modal-title">Rename Rule Group</div>
+      </div>
+      <button id="screening-group-rename-modal-close" class="cs-modal-x" type="button" aria-label="Close">×</button>
+    </div>
+
+    <form id="screening-group-rename-modal-form" class="cs-modal-body screening-group-modal-form">
+      <label class="field">
+        <span class="field-label">Group Name</span>
+        <input id="screening-group-rename-name" class="api-input" type="text" maxlength="120" required>
+      </label>
+
+      <div id="screening-group-rename-modal-error" class="error-text" hidden></div>
+    </form>
+
+    <div class="cs-modal-footer">
+      <button id="screening-group-rename-modal-cancel" class="btn-ghost" type="button">Cancel</button>
+      <button id="screening-group-rename-modal-submit" class="btn-primary" type="submit" form="screening-group-rename-modal-form">Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="screening-group-assign-modal" class="cs-modal-backdrop" hidden>
+  <div class="cs-modal glass-card screening-group-assign-modal" role="dialog" aria-modal="true" aria-labelledby="screening-group-assign-modal-title">
+    <div class="cs-modal-header">
+      <div class="cs-modal-headings">
+        <div id="screening-group-assign-modal-title" class="cs-modal-title">Assign Rules</div>
+        <div class="cs-modal-subtitle">Choose which enabled and saved rules belong to this group.</div>
+      </div>
+      <button id="screening-group-assign-modal-close" class="cs-modal-x" type="button" aria-label="Close">×</button>
+    </div>
+
+    <form id="screening-group-assign-modal-form" class="cs-modal-body screening-group-assign-modal-form">
+      <div id="screening-group-assign-modal-list" class="screening-group-assign-list"></div>
+      <div id="screening-group-assign-modal-error" class="error-text" hidden></div>
+    </form>
+
+    <div class="cs-modal-footer">
+      <button id="screening-group-assign-modal-cancel" class="btn-ghost" type="button">Cancel</button>
+      <button id="screening-group-assign-modal-submit" class="btn-primary" type="submit" form="screening-group-assign-modal-form">Save Rules</button>
+    </div>
+  </div>
+</div>
+
+  
+  <!-- 1. Load Sentry library -->
+  <script
+    src="https://js.sentry-cdn.com/1df77c56ba17c2098baf02e362c93be2.min.js"
+    crossorigin="anonymous"
+  ></script>
+  
+  <!-- 2. Initialize Sentry with YOUR DSN -->
+  <script src="/js/shared/sentry.js"></script>
+  
+  <!-- 3. Your existing shared code -->
+  <script src="/js/shared/shared.js"></script>
+
+  <script src="/static/js/pages/activate.js"></script> 
+
+
+
+
+  
+  <script src="/static/js/pages/account.js"></script>
+
+  
+  <footer id="site-footer"></footer>
+</body>
+
+  
+</html>

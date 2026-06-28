@@ -1,0 +1,290 @@
+/* /static/css/faq.css */
+body.faq-page{
+  /* match your "app" vibe (deep navy glass), not the old blue gradient center layout */
+  background:
+    radial-gradient(circle at 80% 40%, rgba(56,189,248,0.22), transparent 60%),
+    radial-gradient(circle at 10% 0%, rgba(56,189,248,0.12), transparent 55%),
+    linear-gradient(120deg, #0B78CF 0%, #031728 45%, #020617 100%);
+  color: var(--text-main);
+}
+
+body.faq-page .page{
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 28px 18px 60px;
+}
+
+/* HERO */
+.faq-hero{
+  padding: 18px 18px 16px;
+  margin-top: 18px;
+  border-radius: var(--radius-lg, 22px);
+}
+
+.faq-hero-top{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:16px;
+}
+
+.faq-eyebrow{
+  display:inline-block;
+  font-size:.72rem;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color: rgba(148,163,184,.95);
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(148,163,184,.18);
+  background: rgba(2,6,23,.18);
+  margin-bottom: 10px;
+}
+
+.faq-title{
+  margin: 0;
+  font-family: "Space Grotesk", system-ui, sans-serif;
+  font-size: clamp(1.7rem, 2.2vw, 2.1rem);
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  color: #f9fafb;
+}
+
+.faq-subtitle{
+  margin: 10px 0 0;
+  color: rgba(148,163,184,.95);
+  max-width: 70ch;
+  line-height: 1.55;
+  font-size: .95rem;
+}
+
+/* CONTROLS */
+.faq-controls{
+  margin-top: 16px;
+  display:flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  align-items:flex-end;
+  justify-content: space-between;
+}
+
+.faq-search-wrap{ flex: 1 1 340px; min-width: 280px; }
+
+.faq-search-label{
+  display:block;
+  font-size:.72rem;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color: rgba(148,163,184,.9);
+  margin: 0 0 6px;
+}
+
+.faq-search{
+  width:100%;
+  height:44px;
+  border-radius:999px;
+  border:1px solid rgba(148,163,184,0.22);
+  background: rgba(15,23,42,0.70);
+  color: var(--text-main);
+  padding: 0 16px;
+  outline:none;
+  box-sizing:border-box;
+  transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.faq-search::placeholder{ color: rgba(148,163,184,.75); }
+
+.faq-search:focus{
+  border-color: rgba(56,189,248,.75);
+  box-shadow: 0 0 0 3px rgba(56,189,248,.14);
+  background: rgba(15,23,42,0.82);
+}
+
+.faq-search-hint{
+  margin-top: 8px;
+  font-size: .82rem;
+  color: rgba(148,163,184,.92);
+}
+
+/* tags */
+.faq-tags{
+  display:flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content:flex-end;
+}
+
+.faq-tag{
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(148,163,184,.18);
+  background: rgba(15,23,42,.55);
+  color: rgba(229,231,235,.92);
+  font-size: .78rem;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .10s ease, border-color .15s ease, background .15s ease, box-shadow .15s ease;
+}
+
+.faq-tag:hover{
+  transform: translateY(-1px);
+  border-color: rgba(56,189,248,.45);
+  box-shadow: 0 12px 26px rgba(0,0,0,.22);
+}
+
+.faq-tag.is-active{
+  background: rgba(56,189,248,.14);
+  border-color: rgba(56,189,248,.55);
+  box-shadow: 0 0 0 3px rgba(56,189,248,.10);
+  color: #e0f2fe;
+}
+
+/* GRID */
+.faq-grid{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.faq-card{
+  padding: 14px 14px 8px;
+  border-radius: var(--radius-lg, 22px);
+}
+
+.faq-card-title{
+  margin: 4px 4px 10px;
+  font-family:"Space Grotesk", system-ui, sans-serif;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  font-size: .92rem;
+  color: rgba(229,231,235,.96);
+}
+
+/* Accordion */
+.faq-item{
+  border-top: 1px solid rgba(148,163,184,.14);
+  padding: 10px 2px;
+}
+
+.faq-item:first-of-type{ border-top: 0; }
+
+.faq-q{
+  list-style:none;
+  cursor:pointer;
+  font-weight: 650;
+  color: rgba(249,250,251,.96);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+  padding: 6px 6px;
+  border-radius: 12px;
+  transition: background .14s ease, box-shadow .14s ease;
+}
+
+.faq-q::-webkit-details-marker{ display:none; }
+
+.faq-q::after{
+  content:"▾";
+  opacity: .75;
+  font-size: 14px;
+  transform: translateY(-1px);
+}
+
+details[open] > .faq-q::after{
+  content:"▴";
+  opacity: .85;
+}
+
+.faq-q:hover{
+  background: rgba(148,163,184,.08);
+}
+
+.faq-a{
+  padding: 8px 10px 6px;
+  color: rgba(148,163,184,.98);
+  line-height: 1.6;
+  font-size: .95rem;
+}
+
+.faq-a p{ margin: 0 0 10px; }
+.faq-a p:last-child{ margin-bottom: 0; }
+
+.faq-a ul{
+  margin: 8px 0 0 18px;
+  padding: 0;
+}
+
+.faq-a li{ margin: 6px 0; }
+
+/* Footer CTA */
+.faq-footer{
+  margin-top: 16px;
+  padding: 18px;
+  border-radius: var(--radius-lg, 22px);
+  display:flex;
+  gap: 16px;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap: wrap;
+}
+
+.faq-footer-title{
+  margin: 0;
+  font-family:"Space Grotesk", system-ui, sans-serif;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  font-size: 1.05rem;
+  color: #f9fafb;
+}
+
+.faq-footer-sub{
+  margin: 8px 0 0;
+  color: rgba(148,163,184,.95);
+}
+
+.faq-footer-actions{
+  display:flex;
+  gap: 10px;
+  align-items:center;
+}
+
+/* mobile tweaks */
+@media (max-width: 720px){
+  .faq-controls{ align-items: stretch; }
+  .faq-tags{ justify-content:flex-start; }
+  .faq-tag{ height: 36px; }
+}
+
+/* =================================
+   FAQ PAGE — force normal header
+   ================================= */
+
+body.faq-page{
+  display: block !important;   /* kill flex centering */
+}
+
+/* wrapper should never constrain width */
+body.faq-page #site-header{
+  width: 100% !important;
+  max-width: none !important;
+}
+
+/* actual header bar must span full width */
+body.faq-page #site-header .site-header.glass-nav{
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  border-radius: 0 !important; /* optional if you see rounding */
+}
+
+/* center inner nav content */
+body.faq-page #site-header .site-header.glass-nav .nav-inner{
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+}

@@ -1,0 +1,35 @@
+{
+  "name": "carrier-vetting",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "start": "node src/app/server.js"
+  },
+  "engines": {
+    "node": "22.x"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.955.0",
+    "@aws-sdk/client-textract": "^3.956.0",
+    "@aws-sdk/s3-request-presigner": "^3.955.0",
+    "@google-cloud/storage": "^7.18.0",
+    "@google-cloud/vision": "^5.3.4",
+    "@sentry/node": "^10.38.0",
+    "aws-sdk": "^2.1693.0",
+    "bcrypt": "^5.1.1",
+    "connect-redis": "^9.0.0",
+    "express": "^4.18.2",
+    "express-fileupload": "^1.5.2",
+    "express-rate-limit": "^7.5.0",
+    "express-session": "^1.18.0",
+    "fontkit": "^2.0.4",
+    "form-data": "^4.0.5",
+    "mailgun.js": "^12.4.0",
+    "multer": "^2.0.2",
+    "pdf-lib": "^1.17.1",
+    "pdf-parse": "1.1.1",
+    "pg": "^8.11.1",
+    "redis": "^5.10.0",
+    "stripe": "^20.4.0"
+  }
+}

@@ -1,0 +1,465 @@
+/* /static/css/signup.css */
+/* Minimal auth/activation components that extend your existing base/style1 tokens. */
+
+body.carrier-list .page{
+  max-width: 980px;
+}
+
+.auth-shell{
+  max-width: 560px;
+  margin: 26px auto 0;
+}
+
+.auth-hero{
+  text-align:center;
+  padding: 20px 10px 14px;
+}
+
+.auth-eyebrow{
+  display:inline-block;
+  font-size: .72rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(148,163,184,.95);
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(148,163,184,.18);
+  background: rgba(2,6,23,.18);
+}
+
+.auth-title{
+  margin: 14px 0 0;
+  font-family: "Space Grotesk", system-ui, sans-serif;
+  font-size: clamp(1.6rem, 2.6vw, 2.2rem);
+  letter-spacing: .02em;
+  color: rgba(249,250,251,.98);
+}
+
+.auth-subtitle{
+  margin: 10px auto 0;
+  max-width: 520px;
+  font-size: .98rem;
+  color: rgba(226,232,240,.92);
+  line-height: 1.55;
+}
+
+.auth-card{
+  margin-top: 14px;
+  border-radius: var(--radius-lg, 22px);
+  border: 1px solid rgba(148,163,184,.18);
+  background: rgba(2,6,23,.32);
+  box-shadow: var(--shadow-soft, 0 18px 45px rgba(15, 23, 42, 0.9));
+  overflow: hidden;
+}
+
+.auth-card-inner{
+  padding: 16px 16px 14px;
+  background: radial-gradient(circle at 0 0, rgba(255,255,255,.06), transparent 55%),
+              linear-gradient(135deg, rgba(15,23,42,.70), rgba(2,6,23,.40));
+}
+
+.auth-form{
+  display:grid;
+  gap: 12px;
+}
+
+.auth-grid-2{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 720px){
+  .auth-grid-2{ grid-template-columns: 1fr 1fr; }
+}
+
+/* Inputs: same “premium dark” feel as your .search-input but not pill-shaped */
+.cs-label{
+  font-size: .78rem;
+  color: rgba(148,163,184,.95);
+  margin-bottom: 6px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.cs-input{
+  width:100%;
+  height: 44px;
+  border-radius: var(--radius-md, 14px);
+  border: 1px solid rgba(15,23,42,.9);
+  background: radial-gradient(circle at top left, rgba(15,23,42,.90), rgba(15,23,42,.95));
+  padding: 0 14px;
+  color: var(--text-main, #e5e7eb);
+  font-size: .92rem;
+  outline:none;
+  box-shadow: inset 0 0 0 1px rgba(15,23,42,.85);
+  transition: border-color .18s ease, box-shadow .18s ease;
+  box-sizing:border-box;
+}
+
+.cs-input::placeholder{
+  color: rgba(148,163,184,.78);
+}
+
+.cs-input:focus{
+  border-color: var(--accent-1, #38bdf8);
+  box-shadow: 0 0 0 1px rgba(56,189,248,.55), 0 18px 40px rgba(15,23,42,.9);
+}
+
+.cs-row{
+  display:flex;
+  gap: 10px;
+  align-items:center;
+}
+
+.cs-row-right{
+  justify-content:flex-end;
+}
+
+.cs-help{
+  font-size: .84rem;
+  color: rgba(148,163,184,.95);
+  line-height: 1.5;
+}
+
+.cs-fineprint{
+  margin-top: 10px;
+  font-size: .82rem;
+  color: rgba(148,163,184,.92);
+  display:flex;
+  justify-content:space-between;
+  gap: 10px;
+  flex-wrap:wrap;
+}
+
+.cs-fineprint a{
+  color: rgba(226,232,240,.78);
+  text-decoration:none;
+  border-bottom: 1px solid rgba(226,232,240,.22);
+  padding-bottom: 2px;
+}
+.cs-fineprint a:hover{
+  color: rgba(255,255,255,.95);
+  border-bottom-color: rgba(255,255,255,.55);
+}
+
+/* Buttons: reuse your existing “pills style” feel */
+.cs-btn{
+  height: 42px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font-size: .86rem;
+  font-weight: 500;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  cursor:pointer;
+  transition: transform .12s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease, opacity .18s ease;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap: 10px;
+  user-select:none;
+}
+
+.cs-btn-primary{
+  border: 1px solid rgba(56,189,248,.70);
+  background: radial-gradient(circle at top left, rgba(56,189,248,.30), rgba(15,23,42,1));
+  color: rgba(226,232,240,.96);
+  box-shadow: 0 0 0 1px rgba(15,23,42,.80);
+}
+.cs-btn-primary:hover{
+  box-shadow: 0 0 0 1px rgba(56,189,248,.55), 0 18px 45px rgba(0,0,0,.35);
+  transform: translateY(-1px);
+}
+
+.cs-btn-ghost{
+  border: 1px solid rgba(148,163,184,.22);
+  background: rgba(2,6,23,.22);
+  color: rgba(226,232,240,.85);
+}
+.cs-btn-ghost:hover{
+  border-color: rgba(148,163,184,.35);
+  background: rgba(2,6,23,.30);
+  transform: translateY(-1px);
+}
+
+.cs-btn[disabled]{
+  opacity: .45;
+  cursor:not-allowed;
+  transform: none;
+}
+
+/* Verification */
+.verify-box{
+  padding: 8px 0 4px;
+  text-align:center;
+}
+.verify-icon{
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border: 1px solid rgba(148,163,184,.18);
+  background: rgba(2,6,23,.25);
+  margin-bottom: 10px;
+}
+
+/* Plan selection tiles */
+.plan-grid{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+@media (min-width: 860px){
+  .auth-shell.wide{ max-width: 860px; }
+  .plan-grid{
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.plan-tile{
+  border-radius: 18px;
+  border: 1px solid rgba(148,163,184,.18);
+  background: rgba(2,6,23,.22);
+  padding: 14px 14px 12px;
+  cursor:pointer;
+  transition: transform .12s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+  min-height: 160px;
+  display:flex;
+  flex-direction:column;
+  gap: 8px;
+}
+
+.plan-tile:hover{
+  transform: translateY(-1px);
+  border-color: rgba(148,163,184,.30);
+  box-shadow: 0 18px 45px rgba(0,0,0,.28);
+}
+
+.plan-tile.selected{
+  border-color: rgba(56,189,248,.65);
+  background: linear-gradient(180deg, rgba(56,189,248,.14), rgba(2,6,23,.22));
+  box-shadow: 0 0 0 1px rgba(56,189,248,.35), 0 18px 45px rgba(0,0,0,.35);
+}
+
+.plan-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: 10px;
+}
+
+.plan-name{
+  font-family: "Space Grotesk", system-ui, sans-serif;
+  font-size: 1.0rem;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  color: rgba(249,250,251,.96);
+}
+
+.plan-price{
+  font-size: .92rem;
+  color: rgba(226,232,240,.92);
+}
+
+.plan-price span{
+  color: rgba(148,163,184,.95);
+  font-size: .86rem;
+}
+
+.plan-badge{
+  font-size: .70rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(11,120,207,.35);
+  color: rgba(224,231,255,.92);
+  background: rgba(11,120,207,.10);
+}
+
+.plan-lines{
+  margin-top: 2px;
+  display:grid;
+  gap: 6px;
+  color: rgba(226,232,240,.90);
+  font-size: .90rem;
+}
+
+.plan-lines .muted{
+  color: rgba(148,163,184,.92);
+  font-size: .88rem;
+}
+
+/* Billing summary row */
+.summary-pill{
+  display:inline-flex;
+  align-items:center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(148,163,184,.18);
+  background: rgba(2,6,23,.18);
+  color: rgba(226,232,240,.92);
+  font-size: .86rem;
+}
+
+.summary-pill strong{
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  font-family: "Space Grotesk", system-ui, sans-serif;
+  font-weight: 700;
+}
+
+/* signup.css patch: DO NOT override global layout containers */
+body.carrier-list {
+  display: block !important;
+  place-items: unset !important;
+}
+
+body.carrier-list .page,
+body.carrier-list .page-main {
+  max-width: none !important;
+  width: 100% !important;
+}
+
+/* Give breathing room below the fixed/glass header (adjust if your header height differs) */
+body.carrier-list .page-main {
+  padding-top: 92px !important;
+}
+
+.auth-shell {
+  width: min(560px, 100%);
+  margin: 0 auto;
+}
+
+/* Activation selectable columns */
+
+.selectable {
+  cursor: pointer;
+}
+
+.selected-col {
+  background: linear-gradient(
+    180deg,
+    rgba(56,189,248,.18),
+    rgba(2,6,23,.18)
+  ) !important;
+  box-shadow: inset 0 0 0 1px rgba(56,189,248,.35);
+}
+
+/* Activate-plan: make the embedded plans table behave inside the auth card */
+body.carrier-list .plans-table-wrap{
+  overflow:auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+body.carrier-list .plans-table{
+  min-width: 860px; /* keep the crisp table; scroll on smaller screens */
+}
+
+/* Make the scroll area feel “intentional” */
+body.carrier-list .plans-table-wrap{
+  scrollbar-width: thin;
+}
+
+/* ===== Billing: minimal cleanup ===== */
+
+/* 1) Kill the “orb/circle” that signup/auth pages often add */
+.billing-min .auth-hero::before,
+.billing-min .auth-shell::before,
+.billing-min .auth-card::before,
+.billing-min .auth-card-inner::before {
+  content: none !important;
+  display: none !important;
+}
+
+/* If your circle is an actual element instead of ::before, this catches it */
+.billing-min .auth-orb,
+.billing-min .orb,
+.billing-min .hero-orb {
+  display: none !important;
+}
+
+/* 2) Tighten spacing */
+.billing-min .auth-hero {
+  padding-bottom: 8px;
+}
+
+.billing-min .auth-title {
+  margin: 6px 0 6px;
+}
+
+.billing-min .auth-subtitle {
+  margin: 0;
+  opacity: 0.85;
+}
+
+/* Rows */
+.billing-toprow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.billing-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 14px;
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 12px;
+}
+
+.billing-price {
+  font-size: 26px;
+  font-weight: 850;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+.billing-per {
+  opacity: 0.7;
+  font-weight: 700;
+  margin-left: 4px;
+  font-size: 16px;
+}
+
+.billing-summary-right {
+  text-align: right;
+  max-width: 260px;
+  opacity: 0.8;
+}
+
+.billing-terms {
+  margin-top: 10px;
+}
+
+.billing-terms-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.billing-terms-label input {
+  margin-top: 3px;
+}
+
+.billing-terms-helper {
+  margin-top: 6px;
+  opacity: 0.75;
+}
+
+html, body{ margin:0; }
+body.carrier-list{ padding:0; margin:0; }

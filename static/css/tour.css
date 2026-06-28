@@ -1,0 +1,450 @@
+.cs-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(3, 8, 18, 0.74);
+  backdrop-filter: blur(6px);
+}
+
+.cs-modal-overlay.is-open {
+  display: flex;
+}
+
+.cs-modal {
+  position: relative;
+  width: min(1020px, calc(100vw - 40px));
+  border-radius: 20px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background:
+    radial-gradient(circle at 12% 16%, rgba(30, 64, 175, 0.18), transparent 38%),
+    radial-gradient(circle at 88% 88%, rgba(15, 118, 110, 0.14), transparent 40%),
+    rgba(8, 16, 30, 0.96);
+  box-shadow: 0 36px 120px rgba(2, 6, 23, 0.7);
+  overflow: hidden;
+}
+
+.cs-modal-x {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 3;
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.7);
+  color: rgba(226, 232, 240, 0.92);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.cs-modal-x:hover {
+  border-color: rgba(148, 163, 184, 0.35);
+  background: rgba(30, 41, 59, 0.86);
+}
+
+.cs-tour {
+  display: grid;
+  grid-template-columns: 1.16fr 1fr;
+  min-height: 576px;
+}
+
+.cs-tour-media {
+  position: relative;
+  margin: 22px;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.9), rgba(6, 11, 22, 0.96));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 14px 36px rgba(2, 6, 23, 0.5);
+  overflow: hidden;
+}
+
+.cs-tour-media img {
+  width: 100%;
+  height: 100%;
+  min-height: 530px;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
+.cs-tour-media::after {
+  content: "Screenshot unavailable";
+  position: absolute;
+  inset: 0;
+  display: none;
+  place-content: center;
+  text-align: center;
+  padding: 20px;
+  color: rgba(203, 213, 225, 0.74);
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  background:
+    repeating-linear-gradient(
+      -45deg,
+      rgba(51, 65, 85, 0.35) 0,
+      rgba(51, 65, 85, 0.35) 12px,
+      rgba(30, 41, 59, 0.35) 12px,
+      rgba(30, 41, 59, 0.35) 24px
+    );
+}
+
+.cs-tour-media.is-missing::after {
+  display: grid;
+}
+
+.cs-tour-media.is-missing img {
+  opacity: 0;
+}
+
+.cs-tour-content {
+  display: flex;
+  flex-direction: column;
+  padding: 30px 30px 26px 10px;
+}
+
+.cs-tour-kicker {
+  min-height: 18px;
+  margin: 2px 0 10px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.95);
+}
+
+.cs-tour-title {
+  margin: 0;
+  max-width: 18ch;
+  font-size: 1.9rem;
+  line-height: 1.18;
+  font-weight: 620;
+  color: rgba(248, 250, 252, 0.98);
+  text-wrap: balance;
+}
+
+.cs-tour-body {
+  flex: 1;
+  max-width: 49ch;
+  margin-top: 16px;
+}
+
+.cs-tour-body p {
+  margin: 0 0 13px;
+  font-size: 1.01rem;
+  line-height: 1.62;
+  color: rgba(226, 232, 240, 0.9);
+}
+
+.cs-tour-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cs-tour-list li {
+  position: relative;
+  margin: 0 0 8px;
+  padding-left: 16px;
+  font-size: 0.98rem;
+  line-height: 1.56;
+  color: rgba(226, 232, 240, 0.9);
+}
+
+.cs-tour-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.9);
+}
+
+.cs-tour-cta {
+  margin-top: 10px;
+}
+
+.cs-tour-controls {
+  margin-top: auto;
+  display: grid;
+  gap: 11px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.cs-tour-dontshow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  width: fit-content;
+  font-size: 0.87rem;
+  color: rgba(203, 213, 225, 0.9);
+}
+
+.cs-tour-dontshow input {
+  accent-color: #38bdf8;
+}
+
+.cs-tour-dontshow-intro-wrap {
+  display: none;
+}
+
+.cs-tour-dontshow-intro {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(226, 232, 240, 0.98);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  background: rgba(15, 23, 42, 0.62);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.cs-tour-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.cs-tour-dots {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cs-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.36);
+  background: rgba(30, 41, 59, 0.6);
+  cursor: pointer;
+}
+
+.cs-dot.is-active {
+  border-color: rgba(56, 189, 248, 0.95);
+  background: rgba(56, 189, 248, 0.95);
+}
+
+.cs-tour-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#tourPrev,
+#tourNext,
+#tourGo {
+  min-width: 104px;
+  min-height: 40px;
+  border-radius: 11px;
+  font-size: 0.88rem;
+}
+
+.cs-btn-tour-hero {
+  min-width: 168px !important;
+}
+
+#tourGo {
+  min-width: 210px;
+}
+
+
+.cs-btn-tour-dismiss {
+  min-width: 240px !important;
+  min-height: 44px !important;
+  font-size: 0.96rem !important;
+  font-weight: 700;
+  border: 1px solid rgba(148, 163, 184, 0.65) !important;
+  background: rgba(30, 41, 59, 0.95) !important;
+  color: #f8fafc !important;
+}
+
+.cs-btn-tour-dismiss:hover {
+  border-color: rgba(226, 232, 240, 0.95) !important;
+  background: rgba(15, 23, 42, 1) !important;
+}
+
+.cs-tour-link {
+  display: inline-block;
+  width: fit-content;
+  font-size: 0.83rem;
+  color: rgba(148, 163, 184, 0.95);
+  text-decoration: none;
+}
+
+.cs-tour-link:hover {
+  color: rgba(226, 232, 240, 0.95);
+}
+
+.cs-tour-intro-badge {
+  display: none;
+  position: absolute;
+  top: 20px;
+  left: 24px;
+  z-index: 2;
+  opacity: 0.95;
+}
+
+.cs-tour-logo {
+  width: auto;
+  height: 30px;
+}
+
+.cs-modal.cs-tour-intro {
+  width: min(1080px, calc(100vw - 40px));
+}
+
+.cs-modal.cs-tour-intro .cs-tour {
+  grid-template-columns: 1fr;
+  min-height: 0;
+}
+
+.cs-modal.cs-tour-intro .cs-tour-media {
+  display: none;
+}
+
+.cs-modal.cs-tour-intro .cs-tour-intro-badge {
+  display: block;
+}
+
+.cs-modal.cs-tour-intro .cs-tour-content {
+  padding: 78px 74px 48px;
+}
+
+.cs-modal.cs-tour-intro .cs-tour-kicker {
+  margin-bottom: 14px;
+}
+
+.cs-modal.cs-tour-intro .cs-tour-title {
+  max-width: 26ch;
+  font-size: clamp(2rem, 3.7vw, 2.8rem);
+  line-height: 1.08;
+}
+
+.cs-modal.cs-tour-intro .cs-tour-body {
+  max-width: 62ch;
+  margin-top: 18px;
+}
+
+.cs-modal.cs-tour-intro .cs-tour-controls {
+  border-top: 0;
+  padding-top: 10px;
+}
+
+.cs-modal.cs-tour-intro .cs-tour-dontshow-intro-wrap {
+  display: block;
+}
+
+.cs-modal.cs-tour-intro .cs-tour-dots,
+.cs-modal.cs-tour-intro #tourPrev,
+.cs-modal.cs-tour-intro .cs-tour-dontshow,
+.cs-modal.cs-tour-intro .cs-tour-link {
+  display: none;
+}
+
+.cs-modal.cs-tour-intro .cs-tour-footer {
+  justify-content: flex-start;
+}
+
+.cs-modal.cs-tour-intro .cs-tour-actions {
+  gap: 14px;
+}
+
+html.cs-modal-open {
+  overflow: hidden;
+}
+
+@media (max-width: 980px) {
+  .cs-tour {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .cs-tour-media {
+    margin: 18px 18px 0;
+    min-height: 280px;
+  }
+
+  .cs-tour-media img {
+    min-height: 280px;
+    max-height: 360px;
+  }
+
+  .cs-tour-content {
+    padding: 20px 18px 20px;
+  }
+
+  .cs-tour-title {
+    font-size: clamp(1.55rem, 5.1vw, 2rem);
+    max-width: 20ch;
+  }
+
+  .cs-modal.cs-tour-intro .cs-tour-content {
+    padding: 74px 24px 28px;
+  }
+}
+
+@media (max-width: 620px) {
+  .cs-modal-overlay {
+    padding: 10px;
+  }
+
+  .cs-modal,
+  .cs-modal.cs-tour-intro {
+    width: calc(100vw - 20px);
+    border-radius: 16px;
+  }
+
+  .cs-tour-media {
+    margin: 12px 12px 0;
+    min-height: 224px;
+  }
+
+  .cs-tour-media img {
+    min-height: 224px;
+    max-height: 260px;
+  }
+
+  .cs-tour-content {
+    padding: 16px 12px 14px;
+  }
+
+  .cs-tour-kicker {
+    margin-bottom: 8px;
+  }
+
+  .cs-tour-body p,
+  .cs-tour-list li {
+    font-size: 0.95rem;
+    line-height: 1.55;
+  }
+
+  .cs-tour-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .cs-tour-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  #tourGo {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .cs-modal.cs-tour-intro .cs-tour-content {
+    padding: 64px 16px 20px;
+  }
+}

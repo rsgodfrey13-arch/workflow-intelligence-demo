@@ -1,0 +1,86 @@
+<!-- Bulk Import Modal -->
+<div id="import-modal" class="import-modal hidden">
+  <!-- IMPORTANT: backdrop must NOT steal clicks -->
+  <div
+    class="import-modal-backdrop"
+    style="position:absolute; inset:0; pointer-events:none; z-index:0;"
+  ></div>
+
+  <!-- IMPORTANT: dialog must be above backdrop and receive clicks -->
+  <div
+    class="import-modal-dialog glass-card"
+    style="position:relative; z-index:1; pointer-events:auto;"
+  >
+    <header class="import-modal-header">
+      <div>
+        <h2 class="import-modal-title">Carrier Import Wizard</h2>
+        <p class="import-modal-subtitle">
+          Upload a CSV or paste DOTs, then review and confirm before importing.
+        </p>
+      </div>
+      <button class="import-modal-close" id="import-modal-close" type="button">✕</button>
+    </header>
+
+    <div class="import-steps">
+      <div class="import-step import-step-1 import-step-active">
+        <span class="import-step-number">1</span><span>Upload</span>
+      </div>
+      <div class="import-step import-step-2">
+        <span class="import-step-number">2</span><span>Review</span>
+      </div>
+      <div class="import-step import-step-3">
+        <span class="import-step-number">3</span><span>Done</span>
+      </div>
+    </div>
+
+    <div class="import-step-body import-step-body-1 active">
+      <div class="import-method-toggle">
+        <button class="import-method-btn import-method-active" type="button" data-import-method="csv">
+          Upload CSV
+        </button>
+        <button class="import-method-btn" type="button" data-import-method="paste">
+          Paste DOT list
+        </button>
+      </div>
+
+      <div class="import-panels">
+        <div id="import-panel-csv" class="import-panel active">
+          <div id="csv-dropzone" class="dropzone">
+            <input id="csv-file-input" type="file" accept=".csv" hidden>
+            <div class="dropzone-inner">
+              <p class="dropzone-title">Drop your CSV here</p>
+              <p class="dropzone-subtitle">or click to browse</p>
+            </div>
+          </div>
+
+          <div class="import-help-row">
+            <button id="browse-csv-btn" type="button">Choose file…</button>
+            <a href="/sample-carrier-import.csv" download>Download sample CSV</a>
+          </div>
+
+          <div id="csv-upload-summary" class="csv-upload-summary hidden">
+            ✓ CSV loaded <span id="csv-file-name"></span> —
+            <span id="csv-dot-count">0</span> DOTs
+          </div>
+        </div>
+
+        <div id="import-panel-paste" class="import-panel">
+          <textarea
+            id="dot-paste-textarea"
+            rows="6"
+            placeholder="517125&#10;97615"
+          ></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="import-step-body import-step-body-2"></div>
+    <div class="import-step-body import-step-body-3"></div>
+
+    <footer class="import-modal-footer">
+      <button id="import-back-btn" type="button">Back</button>
+      <button id="import-cancel-btn" type="button">Cancel</button>
+      <button id="import-next-btn" type="button">Next</button>
+    </footer>
+  </div>
+</div>

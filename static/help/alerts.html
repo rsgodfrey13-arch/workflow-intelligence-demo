@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Alerts & Monitoring • Help Center</title>
+
+<link rel="stylesheet" href="/static/css/base.css">
+<link rel="stylesheet" href="/static/css/style1.css">
+<link rel="stylesheet" href="/static/css/help.css">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+</head>
+
+<body class="carrier-list">
+
+<div class="bg-gradient"></div>
+<div class="bg-grid"></div>
+
+<div id="site-header"></div>
+
+<main class="help-shell help-article-shell">
+
+  <nav class="help-breadcrumb">
+    <a href="/help">Help</a>
+    <span class="help-breadcrumb-sep">/</span>
+    <span>Alerts & Monitoring</span>
+  </nav>
+
+  <div class="help-article-layout">
+
+    <!-- LEFT NAV -->
+    <aside class="help-sidenav">
+
+      <div class="help-sidenav-title">Help Center</div>
+
+      <div class="help-sidenav-group">
+        <a class="help-sidenav-link" href="/help/getting-started">Getting Started</a>
+        <a class="help-sidenav-link" href="/help/managing-carriers">Managing Carriers</a>
+        <a class="help-sidenav-link is-active" href="/help/alerts">Alerts & Monitoring</a>
+
+        <a class="help-sidenav-sub" href="#email-alerts">Email Alerts</a>
+        <a class="help-sidenav-sub" href="#carrier-level-controls">Carrier-Level Controls</a>
+        <a class="help-sidenav-sub" href="#api-notifications">API Notifications</a>
+        <a class="help-sidenav-sub" href="#webhook-setup">Webhook Setup</a>
+        <a class="help-sidenav-sub" href="#delivery-notes">Delivery Notes</a>
+      </div>
+
+      <div class="help-sidenav-group">
+        <a class="help-sidenav-link" href="/help/billing">Billing & Plans</a>
+        <a class="help-sidenav-link" href="/help">Help Center</a>
+      </div>
+
+      <div class="help-sidenav-mini">
+        <div class="help-sidenav-mini-title">Need help?</div>
+        <a class="help-sidenav-mini-link" href="/account#help">Contact support</a>
+      </div>
+
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <article class="help-content">
+
+      <header class="help-content-header">
+        <h1 class="help-h1">Alerts & Monitoring</h1>
+        <p class="help-lede">
+          Configure email alerts and connect Carrier Shark to your internal systems with API and webhook delivery.
+        </p>
+
+        <div class="help-meta">
+          <span class="help-badge">4–8 minutes</span>
+          <span class="help-badge help-badge-ghost">Intermediate</span>
+        </div>
+      </header>
+
+      <!-- EMAIL ALERTS -->
+      <section id="email-alerts" class="help-section">
+
+        <h2 class="help-h2">Email Alerts</h2>
+
+        <p class="help-p">
+          Email alerts let you choose exactly which carrier changes should trigger notifications. You can enable or
+          disable alert categories, customize the fields you care about, and save preferences for your account.
+        </p>
+
+        <div class="help-step">
+          <div class="help-step-title">Step 1 — Open Email Alerts</div>
+
+          <div class="help-step-body">
+            <div class="help-shot">
+              <img src="/static/images/help/21.png" alt="Email alerts settings page screenshot placeholder" />
+            </div>
+
+            <ul class="help-bullets">
+              <li>Go to <strong>My Account</strong> and open <strong>Email Alerts</strong>.</li>
+              <li>Use the alerts master switch to enable or disable account-level email delivery.</li>
+              <li>If the master switch is off, carrier alerts will not be delivered by email.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="help-step">
+          <div class="help-step-title">Step 2 — Choose what to monitor</div>
+
+          <div class="help-step-body">
+            <div class="help-shot">
+              <img src="/static/images/help/22.png" alt="Alert field selection screenshot placeholder" />
+            </div>
+
+            <ul class="help-bullets">
+              <li>Select the carrier fields that should trigger alerts.</li>
+              <li>Categories can include authority, safety, compliance, identity, address, fleet, crashes, and more.</li>
+              <li>Choose only the changes that matter to your operation to keep alerts high-signal.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="help-step">
+          <div class="help-step-title">Step 3 — Save your alert preferences</div>
+
+          <div class="help-step-body">
+            <div class="help-shot">
+              <img src="/static/images/help/23.png" alt="Save email alert settings screenshot placeholder" />
+            </div>
+
+            <ul class="help-bullets">
+              <li>After updating your selections, click <strong>Save changes</strong>.</li>
+              <li>Your account will use those settings for email delivery going forward.</li>
+              <li>You can return anytime to adjust which changes generate alerts.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="help-callout">
+          <div class="help-callout-title">Best practice</div>
+          <div class="help-callout-body">
+            Start with authority, safety, insurance, and compliance-related changes. You can expand into lower-priority
+            fields later once your workflow is dialed in.
+          </div>
+        </div>
+
+      </section>
+
+      <!-- CARRIER LEVEL CONTROLS -->
+      <section id="carrier-level-controls" class="help-section">
+
+        <h2 class="help-h2">Carrier-Level Controls</h2>
+
+        <p class="help-p">
+          In addition to account-wide email settings, Carrier Shark also lets you control email alert delivery at the
+          carrier level. This is useful when some carriers should stay monitored without sending email notifications for every record.
+        </p>
+
+        <div class="help-step">
+          <div class="help-step-title">Step 1 — Open a carrier profile</div>
+
+          <div class="help-step-body">
+            <div class="help-shot">
+              <img src="/static/images/help/24.png" alt="Carrier profile email alerts toggle screenshot placeholder" />
+            </div>
+
+            <ul class="help-bullets">
+              <li>Open any carrier from <strong>My Carriers</strong> or search.</li>
+              <li>Use the email alerts toggle at the top of the carrier profile to control alert delivery for that carrier.</li>
+              <li>This lets you keep monitoring active while controlling where notifications are sent.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="help-step">
+          <div class="help-step-title">Step 2 — Combine account and carrier settings</div>
+
+          <div class="help-step-body">
+            <!-- <div class="help-shot">
+              <img src="/static/images/help/25.png" alt="Carrier profile top section screenshot placeholder" />
+            </div>  -->
+
+            <ul class="help-bullets">
+              <li>Account settings control what kinds of changes qualify as alerts.</li>
+              <li>Carrier-level toggles help you decide which monitored carriers should send email notifications.</li>
+              <li>Together, these controls make email delivery flexible for larger carrier lists.</li>
+            </ul>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- API -->
+      <section id="api-notifications" class="help-section">
+
+        <h2 class="help-h2">API Notifications</h2>
+
+        <p class="help-p">
+          Carrier Shark API access is available for teams that want to bring alert data and carrier events into internal
+          systems. API access is intended for operational workflows, integrations, and custom implementations.
+        </p>
+
+        <div class="help-step">
+          <div class="help-step-title">Step 1 — Open API settings</div>
+
+          <div class="help-step-body">
+            <div class="help-shot">
+              <img src="/static/images/help/25.png" alt="API settings page screenshot placeholder" />
+            </div>
+
+            <ul class="help-bullets">
+              <li>Go to <strong>My Account</strong> and open <strong>API</strong>.</li>
+              <li>Your API page includes key access, integration settings, and a link to documentation.</li>
+              <li>Use this page as your starting point for technical setup.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="help-step">
+          <div class="help-step-title">Step 2 — Use API access for internal workflows</div>
+
+          <div class="help-step-body">
+
+            <ul class="help-bullets">
+              <li>API access is best for teams that want to route Carrier Shark data into internal tools or operational dashboards.</li>
+              <li>Your integration can be tailored to your workflow, system architecture, and alert requirements.</li>
+              <li>For setup help or implementation questions, contact <strong>integrations@carriershark.com</strong>.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="help-callout">
+          <div class="help-callout-title">Documentation</div>
+          <div class="help-callout-body">
+            API documentation is available from the API section. If you need implementation guidance, contact
+            <strong>integrations@carriershark.com</strong>.
+          </div>
+        </div>
+
+      </section>
+
+      <!-- WEBHOOKS -->
+      <section id="webhook-setup" class="help-section">
+
+        <h2 class="help-h2">Webhook Setup</h2>
+
+        <p class="help-p">
+          Webhooks are available for teams that want Carrier Shark to push alert events into internal systems in real time.
+          This is a strong fit for TMS integrations, operations dashboards, internal automations, and custom workflows.
+        </p>
+
+        <div class="help-step">
+          <div class="help-step-title">Step 1 — Add your webhook destination</div>
+
+          <div class="help-step-body">
+            <div class="help-shot">
+              <img src="/static/images/help/26.png" alt="Webhook URL field screenshot placeholder" />
+            </div>
+
+            <ul class="help-bullets">
+              <li>Open the <strong>API</strong> section in <strong>My Account</strong>.</li>
+              <li>Use the webhook area to define the destination for real-time event delivery.</li>
+              <li>Webhook delivery can be aligned to your operational workflow and supported integrations.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="help-step">
+          <div class="help-step-title">Step 2 — Coordinate supported integrations</div>
+
+          <div class="help-step-body">
+
+            <ul class="help-bullets">
+              <li>For production webhook setup, contact <strong>integrations@carriershark.com</strong>.</li>
+              <li>Carrier Shark can support integrations into your existing systems and workflows.</li>
+              <li>This ensures your webhook delivery is configured correctly for your use case.</li>
+            </ul>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- DELIVERY NOTES -->
+      <section id="delivery-notes" class="help-section">
+
+        <h2 class="help-h2">Delivery Notes</h2>
+
+        <p class="help-p">
+          Carrier Shark is designed to support both self-serve alerting and operational integrations. The right delivery
+          method depends on how your team works and where alert data needs to go.
+        </p>
+
+        <div class="help-step">
+          <div class="help-step-title">Choose the right delivery method</div>
+
+          <div class="help-step-body">
+            <ul class="help-bullets">
+              <li>Use <strong>Email Alerts</strong> for fast human-readable updates.</li>
+              <li>Use the <strong>REST API</strong> when your team wants access to data inside internal systems.</li>
+              <li>Use <strong>Webhooks</strong> for real-time automated delivery into supported workflows.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="help-step">
+          <div class="help-step-title">Need integration help?</div>
+
+          <div class="help-step-body">
+
+
+            <ul class="help-bullets">
+              <li>For API onboarding, webhook configuration, or integration planning, contact <strong>integrations@carriershark.com</strong>.</li>
+              <li>The Carrier Shark team can help align alert delivery with your operational workflow.</li>
+              <li>If you are not sure which method fits best, start with email alerts and expand from there.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="help-related">
+          <div class="help-related-title">Related guides</div>
+          <div class="help-related-links">
+            <a href="/help/managing-carriers">Managing Carriers</a>
+            <a href="/help">Help Center</a>
+          </div>
+        </div>
+
+      </section>
+
+    </article>
+  </div>
+</main>
+
+<script src="/js/shared/shared.js"></script>
+
+<footer id="site-footer"></footer>
+
+</body>
+</html>

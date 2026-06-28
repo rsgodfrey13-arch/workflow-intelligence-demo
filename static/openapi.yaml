@@ -1,0 +1,1999 @@
+openapi: 3.0.3
+info:
+  title: CarrierShark API v1
+  version: 1.0.0
+  description: |
+    The CarrierShark API allows companies to monitor carriers, receive compliance alerts, and manage digital carrier contracts.
+
+    Base URL:
+    https://carriershark.com/api/v1
+
+    Authentication:
+    All endpoints require a company API key.
+
+    Authorization header format:
+
+    Authorization: Bearer cs_live_your_api_key
+
+    Test key example:
+    cs_test_123456789
+  contact:
+    name: CarrierShark Support
+    email: support@carriershark.com
+    url: https://carriershark.com
+  license:
+    name: Proprietary
+servers:
+  - url: https://carriershark.com/api/v1
+    description: Production v1 API
+security:
+  - bearerAuth: []
+tags:
+  - name: Carriers
+    description: Search carriers and manage saved carriers.
+  - name: Alerts
+    description: Retrieve alerts and manage alert status.
+  - name: Contracts
+    description: Retrieve contracts and manage contract status.
+  - name: Imports
+    description: Check import limits and import carriers in bulk.
+paths:
+  /me/carriers/import-limits:
+    get:
+      tags: [Imports]
+      summary: Get import limits
+      description: |
+        Returns your plan's carrier import limits and current usage.
+        Use this before bulk imports to confirm total capacity and per-import caps.
+      operationId: getCarrierImportLimits
+      responses:
+        '200':
+          description: Import limits loaded successfully.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [plan, max_total, max_per_import, chunk_size, current_total]
+                properties:
+                  plan:
+                    type: string
+                  max_total:
+                    type: integer
+                  max_per_import:
+                    type: integer
+                  chunk_size:
+                    type: integer
+                  current_total:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Rate limit exceeded
+        '500':
+          description: Failed to load import limits.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Failed to load import limits
+
+  /me/carriers/import:
+    post:
+      tags: [Imports]
+      summary: Import carriers
+      description: |
+        Imports multiple carrier DOT numbers into your saved carriers.
+        DOT values are normalized, limits are enforced, and invalid or skipped entries are returned.
+      operationId: importCarriers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [dots]
+              properties:
+                dots:
+                  type: array
+                  description: Array of DOT numbers to import.
+                  items:
+                    type: string
+            examples:
+              bulkImport:
+                value:
+                  dots: ["336075", "123456"]
+      responses:
+        '200':
+          description: Import was processed.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - received
+                  - valid_unique
+                  - attempted
+                  - inserted
+                  - already_had
+                  - rejected_due_to_import_limit
+                  - rejected_due_to_plan_limit
+                  - invalid_count
+                  - invalid_sample
+                properties:
+                  received:
+                    type: integer
+                  valid_unique:
+                    type: integer
+                  attempted:
+                    type: integer
+                  inserted:
+                    type: integer
+                  already_had:
+                    type: integer
+                  rejected_due_to_import_limit:
+                    type: integer
+                  rejected_due_to_plan_limit:
+                    type: integer
+                  invalid_count:
+                    type: integer
+                  invalid_sample:
+                    type: array
+                    items:
+                      type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Rate limit exceeded
+        '500':
+          description: Failed to import carriers.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Failed to import carriers
+
+  /carriers:
+    get:
+      tags: [Carriers]
+      summary: Search carrier database
+      description: |
+        Lookup-oriented carrier search endpoint for focused carrier retrieval.
+        Broader extraction workflows should use saved carriers or enterprise workflows.
+        Strict rate limits are intentional to discourage bulk polling.
+
+        Allowed searches:
+        - dot
+        - mc
+        - legalname with 3+ characters
+        - dbaname with 3+ characters
+        - city + state
+
+        Blocked searches:
+        - state alone
+        - city alone
+        - legalname shorter than 3 chars
+        - dbaname shorter than 3 chars
+      operationId: searchCarriers
+      parameters:
+        - $ref: '#/components/parameters/DotQuery'
+        - name: mc
+          in: query
+          schema:
+            type: string
+        - name: legalname
+          in: query
+          schema:
+            type: string
+        - name: dbaname
+          in: query
+          schema:
+            type: string
+        - name: city
+          in: query
+          schema:
+            type: string
+        - name: state
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: Page number of results (starting at 1, maximum 5 for this endpoint).
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 5
+            default: 1
+        - name: pageSize
+          in: query
+          description: Number of results per page (maximum 25 for this endpoint).
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 25
+            default: 25
+      responses:
+        '200':
+          description: Carrier search results.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarrierListResponse'
+              example:
+                rows:
+                  - dot: "336075"
+                    dotnumber: "336075"
+                    legalname: ACME TRANSPORT LLC
+                    dbaname: ACME LOGISTICS
+                    mc_number: "MC-654321"
+                    phystreet: 123 MAIN ST
+                    phycity: DALLAS
+                    phystate: TX
+                    phyzipcode: "75201"
+                    phycountry: US
+                    allowedtooperate: AUTHORIZED
+                    safetyrating: SATISFACTORY
+                    statuscode: A
+                    totaldrivers: 12
+                    totalpowerunits: 10
+                    retrieval_date: '2026-03-15T00:00:00.000Z'
+                    last_polled_at: '2026-03-30T18:42:31.000Z'
+                    insurance_summary:
+                      has_on_file: true
+                      has_structured_coverages: true
+                      is_expired: false
+                      next_expiration_date: '2026-12-31'
+                      auto_liability_limit: 1000000
+                      cargo_limit: 100000
+                      general_liability_limit: 1000000
+                      coverage_count: 3
+                total: 1
+                page: 1
+                pageSize: 25
+        '400':
+          description: Invalid carrier search input.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                requiresValidSearch:
+                  value:
+                    error: Search requires dot, mc, legalname (3+ chars), dbaname (3+ chars), or city + state.
+                stateAlone:
+                  value:
+                    error: state alone is too broad; combine it with city, legalname, or dbaname.
+                cityAlone:
+                  value:
+                    error: city alone is too broad; include state.
+                pageSizeLimit:
+                  value:
+                    error: pageSize cannot exceed 25.
+                pageLimit:
+                  value:
+                    error: page cannot exceed 5 for carrier search.
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Carrier search rate limit exceeded. Please slow down.
+        '500':
+          description: Search failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Search failed
+
+  /carriers/{dot}:
+    get:
+      tags: [Carriers]
+      summary: Get carrier
+      description: |
+        Returns a single carrier record for the provided USDOT number.
+        Includes standard carrier fields plus `cargo_carried` when available.
+      operationId: getCarrierByDot
+      parameters:
+        - $ref: '#/components/parameters/DotPath'
+      responses:
+        '200':
+          description: Carrier record with cargo information.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarrierDetail'
+              example:
+                dot: "336075"
+                dotnumber: "336075"
+                legalname: ACME TRANSPORT LLC
+                dbaname: ACME LOGISTICS
+                mc_number: "MC-654321"
+                phystreet: 123 MAIN ST
+                phycity: DALLAS
+                phystate: TX
+                phyzipcode: "75201"
+                phycountry: US
+                allowedtooperate: AUTHORIZED
+                safetyrating: SATISFACTORY
+                statuscode: A
+                totaldrivers: 12
+                totalpowerunits: 10
+                retrieval_date: '2026-03-15T00:00:00.000Z'
+                last_polled_at: '2026-03-30T18:42:31.000Z'
+                address1: 123 MAIN ST
+                address2: null
+                city: DALLAS
+                state: TX
+                zip: "75201"
+                retrieval_date_formatted: Mar 15, 2026 12:00 AM EST
+                cargo_carried:
+                  - General Freight
+                  - Machinery
+                insurance_coverages:
+                  - id: 981
+                    document_id: 442
+                    coverage_type: AUTO LIABILITY
+                    insurer_name: Great West Casualty Company
+                    policy_number: GL-4459011
+                    effective_date: '2026-01-01'
+                    expiration_date: '2026-12-31'
+                    limit_amount: 1000000
+                    status: ACTIVE
+                    is_expired: false
+                  - id: 982
+                    document_id: 442
+                    coverage_type: CARGO
+                    insurer_name: Great West Casualty Company
+                    policy_number: CG-2087710
+                    effective_date: '2026-01-01'
+                    expiration_date: '2026-12-31'
+                    limit_amount: 100000
+                    status: ACTIVE
+                    is_expired: false
+                insurance_summary:
+                  has_on_file: true
+                  has_structured_coverages: true
+                  is_expired: false
+                  next_expiration_date: '2026-12-31'
+                  auto_liability_limit: 1000000
+                  cargo_limit: 100000
+                  general_liability_limit: 1000000
+                  coverage_count: 2
+        '404':
+          description: Carrier not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Carrier not found
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Rate limit exceeded
+        '500':
+          description: Database query failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Database query failed
+
+  /me/carriers:
+    get:
+      tags: [Carriers]
+      summary: List saved carriers
+      description: |
+        Returns the carriers saved to your account.
+        Supports the same filters and pagination as carrier search.
+      operationId: listMyCarriers
+      parameters:
+        - $ref: '#/components/parameters/DotQuery'
+        - name: mc
+          in: query
+          schema:
+            type: string
+        - name: legalname
+          in: query
+          schema:
+            type: string
+        - name: dbaname
+          in: query
+          schema:
+            type: string
+        - name: city
+          in: query
+          schema:
+            type: string
+        - name: state
+          in: query
+          schema:
+            type: string
+        - $ref: '#/components/parameters/PageQuery'
+        - $ref: '#/components/parameters/PageSizeQuery'
+      responses:
+        '200':
+          description: Saved carriers list.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedCarrierListResponse'
+              example:
+                rows:
+                  - dot: "336075"
+                    dotnumber: "336075"
+                    legalname: ACME TRANSPORT LLC
+                    dbaname: ACME LOGISTICS
+                    mc_number: "MC-654321"
+                    phystreet: 123 MAIN ST
+                    phycity: DALLAS
+                    phystate: TX
+                    phyzipcode: "75201"
+                    phycountry: US
+                    allowedtooperate: AUTHORIZED
+                    safetyrating: SATISFACTORY
+                    statuscode: A
+                    totaldrivers: 12
+                    totalpowerunits: 10
+                    retrieval_date: '2026-03-15T00:00:00.000Z'
+                    last_polled_at: '2026-03-30T18:42:31.000Z'
+                    added_at: '2026-03-01T14:25:00Z'
+                    insurance_summary:
+                      has_on_file: true
+                      has_structured_coverages: true
+                      is_expired: false
+                      next_expiration_date: '2026-12-31'
+                      auto_liability_limit: 1000000
+                      cargo_limit: 100000
+                      general_liability_limit: 1000000
+                      coverage_count: 3
+                total: 1
+                page: 1
+                pageSize: 25
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Rate limit exceeded
+        '500':
+          description: Failed to load company carriers.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Failed to load company carriers
+    post:
+      tags: [Carriers]
+      summary: Save carriers
+      description: |
+        Saves one or more carrier DOT numbers to your account.
+        DOT values are normalized and reported as inserted, already saved, or invalid.
+      operationId: addMyCarriers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [dot]
+              properties:
+                dot:
+                  oneOf:
+                    - type: string
+                    - type: array
+                      items:
+                        type: string
+            examples:
+              single:
+                value:
+                  dot: "336075"
+              multiple:
+                value:
+                  dot: ["336075", "123456"]
+      responses:
+        '200':
+          description: Carrier save attempt results.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarrierMutationResponse'
+        '400':
+          description: The request body omitted DOT values or none were valid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                dotRequired:
+                  value:
+                    error: dot is required
+                noValidDots:
+                  value:
+                    error: No valid DOT numbers provided
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Rate limit exceeded
+        '500':
+          description: Failed to add carriers.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Failed to add carriers
+    delete:
+      tags: [Carriers]
+      summary: Remove saved carriers
+      description: |
+        Removes one or more saved carriers from your account.
+        Each submitted DOT is reported as deleted or not found.
+      operationId: deleteMyCarriers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [dot]
+              properties:
+                dot:
+                  oneOf:
+                    - type: string
+                    - type: array
+                      items:
+                        type: string
+            examples:
+              single:
+                value:
+                  dot: "336075"
+              multiple:
+                value:
+                  dot: ["336075", "123456"]
+      responses:
+        '200':
+          description: Carrier delete attempt results.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarrierDeleteResponse'
+        '400':
+          description: The request body omitted DOT values or none were valid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                dotRequired:
+                  value:
+                    error: dot is required
+                noValidDots:
+                  value:
+                    error: No valid DOT numbers provided
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Rate limit exceeded
+        '500':
+          description: Failed to remove carriers.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Failed to remove carriers
+
+  /carriers/{dot}/alerts:
+    get:
+      tags: [Alerts]
+      summary: List carrier alerts
+      description: |
+        Returns alerts for a tracked carrier.
+        Filter by alert ID or status. Error-state alerts are excluded.
+      operationId: listCarrierAlerts
+      parameters:
+        - $ref: '#/components/parameters/DotPath'
+        - name: id
+          in: query
+          schema:
+            type: string
+          description: Alert identifier.
+        - name: status
+          in: query
+          schema:
+            type: string
+          description: Alert status filter.
+        - $ref: '#/components/parameters/PageQuery'
+        - $ref: '#/components/parameters/PageSizeQuery'
+      responses:
+        '200':
+          description: Alert list for the carrier.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Rate limit exceeded
+        '500':
+          description: Failed to load carrier alerts.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Failed to load carrier alerts
+
+  /alerts:
+    get:
+      tags: [Alerts]
+      summary: List alerts
+      description: |
+        Returns alerts across all tracked carriers in your account.
+        Filter by alert ID, status, or DOT number. Error-state alerts are excluded.
+      operationId: listAlerts
+      parameters:
+        - name: id
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: dotnumber
+          in: query
+          schema:
+            type: string
+        - $ref: '#/components/parameters/PageQuery'
+        - $ref: '#/components/parameters/PageSizeQuery'
+      responses:
+        '200':
+          description: Alert list.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertListResponse'
+              example:
+                rows:
+                  - info:
+                      alert_id: 46
+                      event_id: evt_12345
+                      event_type: carrier.updated
+                      dotnumber: "336075"
+                      occurred_at: '2026-03-15T10:15:00Z'
+                      status: NEW
+                      created_at: '2026-03-15T10:16:00Z'
+                    changes:
+                      allowedtooperate:
+                        old: INACTIVE
+                        new: AUTHORIZED
+                    carrier:
+                      dotnumber: "336075"
+                      legalname: ACME TRANSPORT LLC
+                total: 1
+                page: 1
+                pageSize: 25
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Rate limit exceeded
+        '500':
+          description: Failed to load alerts.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Failed to load alerts
+
+  /alerts/new:
+    get:
+      tags: [Alerts]
+      summary: List new alerts
+      description: |
+        Returns alerts in `NEW` status only.
+        Use this endpoint to poll for unprocessed alert activity.
+      operationId: listNewAlerts
+      parameters:
+        - name: id
+          in: query
+          schema:
+            type: string
+        - name: dotnumber
+          in: query
+          schema:
+            type: string
+        - $ref: '#/components/parameters/PageQuery'
+        - $ref: '#/components/parameters/PageSizeQuery'
+      responses:
+        '200':
+          description: New alert list.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Rate limit exceeded
+        '500':
+          description: Failed to load NEW alerts.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Failed to load NEW alerts
+
+  /alerts/processed:
+    patch:
+      tags: [Alerts]
+      summary: Mark alerts processed
+      description: |
+        Marks one or more alerts as `PROCESSED`.
+        Only matching alert IDs in your account are updated.
+      operationId: markAlertsProcessed
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [alerts]
+              properties:
+                alerts:
+                  type: array
+                  items:
+                    type: string
+                  description: Numeric alert IDs.
+            example:
+              alerts: ["46", "47"]
+      responses:
+        '200':
+          description: Alert update results.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertMutationResponse'
+        '400':
+          description: No valid numeric alert IDs were supplied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: alerts array is required (numeric ids)
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Rate limit exceeded
+        '500':
+          description: Failed to mark alerts processed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Failed to mark alerts processed
+
+  /alerts/unprocessed:
+    patch:
+      tags: [Alerts]
+      summary: Mark alerts new
+      description: |
+        Marks one or more alerts back to `NEW`.
+        Only matching alert IDs in your account are updated.
+      operationId: markAlertsUnprocessed
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [alerts]
+              properties:
+                alerts:
+                  type: array
+                  items:
+                    type: string
+                  description: Numeric alert IDs.
+            example:
+              alerts: ["46", "47"]
+      responses:
+        '200':
+          description: Alert update results.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertMutationResponse'
+        '400':
+          description: No valid numeric alert IDs were supplied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: alerts array is required (numeric ids)
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Rate limit exceeded
+        '500':
+          description: Failed to mark alerts unprocessed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Failed to mark alerts unprocessed
+
+  /contracts:
+    get:
+      tags: [Contracts]
+      summary: List contracts
+      description: |
+        Returns contracts in your account.
+        Filter by status, DOT number, contract ID, or created timestamp.
+      operationId: listContracts
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: dotnumber
+          in: query
+          schema:
+            type: string
+        - name: contract_id
+          in: query
+          schema:
+            type: string
+          description: UUID or numeric contract identifier.
+        - name: created_after
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: created_before
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - $ref: '#/components/parameters/PageQuery'
+        - $ref: '#/components/parameters/PageSizeQuery'
+      responses:
+        '200':
+          description: Contract list.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContractListResponse'
+              example:
+                contracts:
+                  - contract:
+                      contract_id: '8b0f63ae-1f1e-4aa3-9211-8b9f24f4eabc'
+                      dotnumber: "336075"
+                      status: SIGNED
+                      created_at: '2026-03-10T12:00:00Z'
+                      updated_at: '2026-03-11T09:00:00Z'
+                      sent_at: '2026-03-10T12:00:00Z'
+                      signed_at: '2026-03-11T08:55:00Z'
+                      provider: docupipe
+                      external_id: dp_123
+                      payload: {}
+                    carrier:
+                      dotnumber: "336075"
+                      legalname: ACME TRANSPORT LLC
+                total: 1
+                page: 1
+                pageSize: 25
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Rate limit exceeded
+        '500':
+          description: Failed to load contracts.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Failed to load contracts
+
+  /contracts/new:
+    get:
+      tags: [Contracts]
+      summary: List signed contracts
+      description: |
+        Returns contracts in `SIGNED` status.
+        Use this for contracts that have been completed by carriers and are ready for broker-side processing.
+      operationId: listNewContracts
+      parameters:
+        - $ref: '#/components/parameters/PageQuery'
+        - $ref: '#/components/parameters/PageSizeQuery'
+      responses:
+        '200':
+          description: Signed contracts.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContractListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Rate limit exceeded
+        '500':
+          description: Failed to load new contracts.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Failed to load new contracts
+
+  /contracts/send/{dot}:
+    post:
+      tags: [Contracts]
+      summary: Send contract
+      description: |
+        Sends a contract email to a carrier and creates a contract record in `SENT` status.
+        This endpoint generates a signing token, stores the contract, and emails the carrier a signing link.
+        This is the canonical send endpoint for v1 integrations (replaces legacy create-only send behavior).
+      operationId: sendContract
+      parameters:
+        - $ref: '#/components/parameters/DotPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user_contract_id
+                - email_to
+              properties:
+                user_contract_id:
+                  type: integer
+                  description: Agreement template ID to send.
+                  example: 12
+                email_to:
+                  type: string
+                  format: email
+                  description: Carrier email address.
+                  example: dispatch@abctrucking.com
+                carrier_name:
+                  type: string
+                  description: Optional carrier display name.
+                  example: ABC Trucking
+            example:
+              user_contract_id: 12
+              email_to: dispatch@abctrucking.com
+              carrier_name: ABC Trucking
+      responses:
+        '200':
+          description: Contract email sent successfully.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok, contract_id, status, link]
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  contract_id:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    example: SENT
+                  link:
+                    type: string
+                    example: https://carriershark.com/contract/abc123token
+        '400':
+          description: Missing required fields or invalid template.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                missingFields:
+                  value:
+                    error: user_contract_id and email_to are required
+                invalidTemplate:
+                  value:
+                    error: Invalid or unauthorized contract template
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Rate limit exceeded
+        '500':
+          description: Failed to send contract.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Failed to send contract
+
+  /contracts/processed:
+    patch:
+      tags: [Contracts]
+      summary: Mark contracts processed
+      description: |
+        Marks one or more `SIGNED` contracts as `PROCESSED`.
+        IDs not found in your account or not currently signed are reported as not updated.
+      operationId: markContractsProcessed
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [contracts]
+              properties:
+                contracts:
+                  type: array
+                  items:
+                    type: string
+                  description: UUID or numeric contract IDs.
+            example:
+              contracts: ["12", "13"]
+      responses:
+        '200':
+          description: Contract update results.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContractMutationProcessedResponse'
+        '400':
+          description: No valid contract identifiers were supplied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: contracts array is required (UUID or numeric ids)
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Rate limit exceeded
+        '500':
+          description: Failed to mark contracts processed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Failed to mark contracts processed
+
+  /contracts/unprocessed:
+    patch:
+      tags: [Contracts]
+      summary: Mark contracts signed
+      description: |
+        Marks one or more `PROCESSED` contracts back to `SIGNED`.
+        IDs not found in your account or not currently processed are reported as not updated.
+      operationId: markContractsUnprocessed
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [contracts]
+              properties:
+                contracts:
+                  type: array
+                  items:
+                    type: string
+                  description: UUID or numeric contract IDs.
+            example:
+              contracts: ["12", "13"]
+      responses:
+        '200':
+          description: Contract update results.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContractMutationUnprocessedResponse'
+        '400':
+          description: No valid contract identifiers were supplied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: contracts array is required (UUID or numeric ids)
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Rate limit exceeded
+        '500':
+          description: Failed to mark contracts unprocessed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Failed to mark contracts unprocessed
+
+  /contracts/{contract_id}:
+    get:
+      tags: [Contracts]
+      summary: Get contract
+      description: |
+        Returns a single contract and its associated carrier record.
+        `contract_id` accepts either a numeric identifier or a UUID.
+      operationId: getContractById
+      parameters:
+        - name: contract_id
+          in: path
+          required: true
+          description: UUID or numeric contract identifier.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Contract found.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContractEnvelope'
+        '400':
+          description: Invalid contract ID format.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Invalid contract_id
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Contract not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Contract not found
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Rate limit exceeded
+        '500':
+          description: Failed to load contract.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Failed to load contract
+
+  /carriers/{dot}/contracts:
+    get:
+      tags: [Contracts]
+      summary: List carrier contracts
+      description: |
+        Lists contracts for a specific carrier in your account.
+        The DOT path parameter must contain digits only.
+      operationId: listCarrierContracts
+      parameters:
+        - $ref: '#/components/parameters/DotPath'
+        - $ref: '#/components/parameters/PageQuery'
+        - $ref: '#/components/parameters/PageSizeQuery'
+      responses:
+        '200':
+          description: Contracts for the carrier.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/X-RateLimit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContractListResponse'
+        '400':
+          description: Invalid DOT format.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Invalid DOT
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Rate limit exceeded
+        '500':
+          description: Failed to load carrier contracts.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Failed to load carrier contracts
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: API_KEY
+      description: |
+        Authenticate using your CarrierShark company API key.
+
+        Example:
+
+        Authorization: Bearer cs_live_your_api_key_here
+  headers:
+    X-RateLimit-Limit:
+      schema:
+        type: integer
+      description: Maximum number of requests allowed in the current window.
+    X-RateLimit-Remaining:
+      schema:
+        type: integer
+      description: Requests remaining in the current rate limit window.
+    X-RateLimit-Reset:
+      schema:
+        type: integer
+      description: UNIX timestamp when the rate limit window resets.
+  parameters:
+    DotPath:
+      name: dot
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^[0-9]+$'
+        example: "336075"
+      description: USDOT number.
+    DotQuery:
+      name: dot
+      in: query
+      schema:
+        type: string
+        pattern: '^[0-9]+$'
+        example: "336075"
+      description: USDOT number.
+    PageQuery:
+      name: page
+      in: query
+      description: Page number of results (starting at 1)
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PageSizeQuery:
+      name: pageSize
+      in: query
+      description: Number of results per page (maximum 100)
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 25
+  responses:
+    UnauthorizedError:
+      description: Missing or invalid API authorization.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Not authorized
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+    InsuranceSummary:
+      type: object
+      required:
+        - has_on_file
+        - has_structured_coverages
+        - is_expired
+        - next_expiration_date
+        - auto_liability_limit
+        - cargo_limit
+        - general_liability_limit
+        - coverage_count
+      properties:
+        has_on_file:
+          type: boolean
+        has_structured_coverages:
+          type: boolean
+        is_expired:
+          type: boolean
+        next_expiration_date:
+          type: string
+          format: date
+          nullable: true
+        auto_liability_limit:
+          type: number
+          nullable: true
+        cargo_limit:
+          type: number
+          nullable: true
+        general_liability_limit:
+          type: number
+          nullable: true
+        coverage_count:
+          type: integer
+    InsuranceCoverage:
+      type: object
+      properties:
+        id:
+          oneOf:
+            - type: integer
+            - type: string
+              format: uuid
+          nullable: true
+        document_id:
+          oneOf:
+            - type: integer
+            - type: string
+              format: uuid
+          nullable: true
+        coverage_type:
+          type: string
+          enum:
+            - AUTO LIABILITY
+            - CARGO
+            - GENERAL LIABILITY
+            - WORKERS COMP
+            - OTHER
+        insurer_name:
+          type: string
+          nullable: true
+        policy_number:
+          type: string
+          nullable: true
+        effective_date:
+          type: string
+          format: date
+          nullable: true
+        expiration_date:
+          type: string
+          format: date
+          nullable: true
+        limit_amount:
+          type: number
+          nullable: true
+        status:
+          type: string
+          enum: [ACTIVE, EXPIRED]
+        is_expired:
+          type: boolean
+    Carrier:
+      type: object
+      description: |
+        Carrier row selected from `carriers` as `c.*` plus a compatibility alias `dot`.
+        Fields listed below are the stable/common fields documented by the API.
+      properties:
+        dot:
+          type: string
+        dotnumber:
+          type: string
+        legalname:
+          type: string
+          nullable: true
+        dbaname:
+          type: string
+          nullable: true
+        mc_number:
+          type: string
+          nullable: true
+        phystreet:
+          type: string
+          nullable: true
+        phycity:
+          type: string
+          nullable: true
+        phystate:
+          type: string
+          nullable: true
+        phyzipcode:
+          type: string
+          nullable: true
+        phycountry:
+          type: string
+          nullable: true
+        allowedtooperate:
+          type: string
+          nullable: true
+        safetyrating:
+          type: string
+          nullable: true
+        statuscode:
+          type: string
+          nullable: true
+        totaldrivers:
+          type: integer
+          nullable: true
+        totalpowerunits:
+          type: integer
+          nullable: true
+        retrieval_date:
+          type: string
+          format: date-time
+          nullable: true
+        last_polled_at:
+          type: string
+          format: date-time
+          nullable: true
+        insurance_summary:
+          $ref: '#/components/schemas/InsuranceSummary'
+      additionalProperties: true
+    CarrierListResponse:
+      type: object
+      required: [rows, total, page, pageSize]
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/Carrier'
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+    SavedCarrier:
+      allOf:
+        - $ref: '#/components/schemas/Carrier'
+        - type: object
+          properties:
+            added_at:
+              type: string
+              format: date-time
+    SavedCarrierListResponse:
+      type: object
+      required: [rows, total, page, pageSize]
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/SavedCarrier'
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+    CarrierDetail:
+      type: object
+      description: Carrier detail row from `/carriers/{dot}` including derived cargo and compatibility fields.
+      allOf:
+        - $ref: '#/components/schemas/Carrier'
+        - type: object
+          properties:
+            address1:
+              type: string
+              nullable: true
+            address2:
+              type: string
+              nullable: true
+            city:
+              type: string
+              nullable: true
+            state:
+              type: string
+              nullable: true
+            zip:
+              type: string
+              nullable: true
+            retrieval_date_formatted:
+              type: string
+              nullable: true
+            cargo_carried:
+              type: array
+              items:
+                type: string
+            insurance_summary:
+              $ref: '#/components/schemas/InsuranceSummary'
+            insurance_coverages:
+              type: array
+              items:
+                $ref: '#/components/schemas/InsuranceCoverage'
+          additionalProperties: true
+    CarrierMutationSummary:
+      type: object
+      required: [totalSubmitted, inserted, duplicates, invalid]
+      properties:
+        totalSubmitted:
+          type: integer
+        inserted:
+          type: integer
+        duplicates:
+          type: integer
+        invalid:
+          type: integer
+    CarrierMutationDetail:
+      type: object
+      required: [dot, status]
+      properties:
+        dot:
+          type: string
+        status:
+          type: string
+          enum: [inserted, already_saved, invalid]
+    CarrierMutationResponse:
+      type: object
+      required: [summary, details]
+      properties:
+        summary:
+          $ref: '#/components/schemas/CarrierMutationSummary'
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/CarrierMutationDetail'
+    CarrierDeleteSummary:
+      type: object
+      required: [totalSubmitted, deleted, notFound]
+      properties:
+        totalSubmitted:
+          type: integer
+        deleted:
+          type: integer
+        notFound:
+          type: integer
+    CarrierDeleteDetail:
+      type: object
+      required: [dot, status]
+      properties:
+        dot:
+          type: string
+        status:
+          type: string
+          enum: [deleted, not_found]
+    CarrierDeleteResponse:
+      type: object
+      required: [summary, details]
+      properties:
+        summary:
+          $ref: '#/components/schemas/CarrierDeleteSummary'
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/CarrierDeleteDetail'
+    AlertInfo:
+      type: object
+      properties:
+        alert_id:
+          oneOf:
+            - type: integer
+            - type: string
+        event_id:
+          oneOf:
+            - type: integer
+            - type: string
+        event_type:
+          type: string
+        dotnumber:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        status:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      additionalProperties: true
+    AlertRow:
+      type: object
+      required: [info]
+      properties:
+        info:
+          $ref: '#/components/schemas/AlertInfo'
+        changes:
+          type: object
+          additionalProperties: true
+          nullable: true
+        carrier:
+          type: object
+          additionalProperties: true
+          nullable: true
+    AlertListResponse:
+      type: object
+      required: [rows, total, page, pageSize]
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlertRow'
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+    AlertMutationSummary:
+      type: object
+      required: [totalSubmitted, updated, notFound]
+      properties:
+        totalSubmitted:
+          type: integer
+        updated:
+          type: integer
+        notFound:
+          type: integer
+    AlertMutationDetail:
+      type: object
+      required: [id, status]
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum: [processed, unprocessed, not_found]
+    AlertMutationResponse:
+      type: object
+      required: [summary, details]
+      properties:
+        summary:
+          $ref: '#/components/schemas/AlertMutationSummary'
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlertMutationDetail'
+    ContractRecord:
+      type: object
+      properties:
+        contract_id:
+          oneOf:
+            - type: integer
+            - type: string
+              format: uuid
+        dotnumber:
+          type: string
+        status:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+        sent_at:
+          type: string
+          format: date-time
+          nullable: true
+        signed_at:
+          type: string
+          format: date-time
+          nullable: true
+        provider:
+          type: string
+          nullable: true
+        external_id:
+          type: string
+          nullable: true
+        payload:
+          type: object
+          additionalProperties: true
+      additionalProperties: true
+    ContractEnvelope:
+      type: object
+      required: [contract, carrier]
+      properties:
+        contract:
+          $ref: '#/components/schemas/ContractRecord'
+        carrier:
+          type: object
+          additionalProperties: true
+    ContractListResponse:
+      type: object
+      required: [contracts, total, page, pageSize]
+      properties:
+        contracts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContractEnvelope'
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+    ContractMutationProcessedSummary:
+      type: object
+      required: [totalSubmitted, updated, notFoundOrNotSigned]
+      properties:
+        totalSubmitted:
+          type: integer
+        updated:
+          type: integer
+        notFoundOrNotSigned:
+          type: integer
+    ContractMutationProcessedResponse:
+      type: object
+      required: [summary, details]
+      properties:
+        summary:
+          $ref: '#/components/schemas/ContractMutationProcessedSummary'
+        details:
+          type: array
+          items:
+            type: object
+            required: [contract_id, status]
+            properties:
+              contract_id:
+                type: string
+              status:
+                type: string
+                enum: [processed, not_found_or_not_signed]
+    ContractMutationUnprocessedSummary:
+      type: object
+      required: [totalSubmitted, updated, notFoundOrNotProcessed]
+      properties:
+        totalSubmitted:
+          type: integer
+        updated:
+          type: integer
+        notFoundOrNotProcessed:
+          type: integer
+    ContractMutationUnprocessedResponse:
+      type: object
+      required: [summary, details]
+      properties:
+        summary:
+          $ref: '#/components/schemas/ContractMutationUnprocessedSummary'
+        details:
+          type: array
+          items:
+            type: object
+            required: [contract_id, status]
+            properties:
+              contract_id:
+                type: string
+              status:
+                type: string
+                enum: [unprocessed, not_found_or_not_processed]

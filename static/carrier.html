@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Carrier Profile</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/base.css">
+  <link rel="stylesheet" href="/static/css/profile_style.css"> 
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+</head>
+<body class="carrier-page">
+  <!-- techy background layers -->
+  <div class="bg-gradient"></div>
+  <div class="bg-grid"></div>
+
+  <div id="site-header"></div>
+  
+  <div class="page">
+    
+<!--
+    <header class="page-header">
+      <div class="page-header-left">
+        <h1 class="page-title">Carrier Profile</h1>
+        <p class="page-subtitle">Live FMCSA-powered risk snapshot</p>
+      </div>
+      <div class="page-header-right">
+        <a href="/" class="ghost-link">
+          <span class="ghost-link-icon">←</span>
+          Back to all carriers
+        </a>
+      </div>
+    </header> -->
+
+    <!-- HERO HEADER CARD -->
+<section id="carrier-header" class="carrier-header glass-card">
+  <div class="carrier-header-top">
+    <div class="carrier-left">
+      <div class="carrier-name-block">
+        <div class="carrier-name-row">
+          <div id="carrier-name" class="carrier-name">Loading…</div>
+        
+          <!-- Email Alerts toggle lives here (next to carrier name) -->
+          <button id="btn-email-alerts" class="email-toggle" type="button">
+            <span class="email-toggle-text">Email Alerts</span>
+          
+            <span class="ios-switch off" aria-hidden="true">
+              <span class="ios-knob"></span>
+              <span class="ios-word ios-on">ON</span>
+              <span class="ios-word ios-off">OFF</span>
+            </span>
+          </button>
+
+        </div>
+
+        <div class="carrier-id-row">
+          <span class="carrier-ids">DOT <span id="carrier-dot">—</span></span>
+          <span class="carrier-ids">MC <span id="carrier-mc">—</span></span>
+          <span class="carrier-ids">EIN <span id="carrier-ein">—</span></span>
+        </div>
+      </div>
+
+      <!-- META INLINE BELOW NAME -->
+      <div class="carrier-meta-inline">
+        <div class="meta-pair">
+          <div class="meta-label">Legal Name</div>
+          <div id="carrier-legalname" class="meta-value">—</div>
+        </div>
+
+        <div class="meta-pair">
+          <div class="meta-label">Address</div>
+          <div class="meta-value">
+            <div id="carrier-address">—</div>
+            <div>
+              <span id="carrier-location">—</span><span id="carrier-zip"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="meta-pair">
+          <div class="meta-label">DBA Name</div>
+          <div id="carrier-dbaname" class="meta-value">—</div>
+        </div>
+
+        <div class="meta-pair">
+          <div class="meta-label">Last Verified</div>
+        
+          <div class="meta-value meta-verified">
+            <span id="field-retrieval_date_formatted">—</span>
+        
+            <button
+              id="btn-refresh-carrier"
+              class="meta-refresh"
+              type="button"
+              title="Re-check carrier data"
+              aria-label="Refresh carrier data"
+            >
+              ↻ Refresh
+            </button>
+        
+            <span id="carrier-refresh-status" class="meta-refresh-status" aria-live="polite"></span>
+          </div>
+        </div>
+
+      </div>
+    </div> <!-- end .carrier-left -->
+
+    <div class="carrier-right">
+      <div class="pill-group">
+        <div id="carrier-status" class="carrier-pill">—</div>
+        <div id="carrier-allowed" class="carrier-pill ghost small" >—</div>
+        <div id="carrier-commonauthoritystatus" class="carrier-pill ghost small" >—</div>
+        <div id="carrier-contractauthoritystatus" class="carrier-pill ghost small" >—</div>
+        <div id="carrier-brokerauthoritystatus" class="carrier-pill ghost small" >—</div>
+        <div id="carrier-safetyrating" class="carrier-pill ghost small" >—</div>
+      </div>
+
+      <section id="screening-summary-card" class="carrier-screening-summary glass-card" hidden>
+        <div class="carrier-screening-head">
+          <div class="carrier-screening-title">Screening</div>
+
+          <div class="carrier-screening-status-block">
+            <span id="screening-status-badge" class="carrier-pill ghost small">
+              NOT SCREENED
+            </span>
+
+            <button
+              id="screening-view-details"
+              class="carrier-screening-link"
+              type="button"
+            >
+              View Details
+            </button>
+          </div>
+        </div>
+
+        <div
+          id="screening-ratio-text"
+          class="carrier-screening-ratio screening-ratio-hidden"
+          aria-hidden="true"
+        >
+          No screening result
+        </div>
+      </section>
+
+      <!--
+      <div class="quick-metrics">
+        <div class="metric-chip">
+          <span class="metric-label">Safety Rating</span>
+          <span id="field-safetyrating" class="carrier-pill ghost small">—</span>
+        </div>
+      </div>
+      -->
+      <!-- ACTION BUTTONS, SEPARATE ROW -->
+      <div class="carrier-actions">
+        
+        <!-- NEW: Send Contract -->
+        <div class="contract-action-wrap">
+          <button id="btn-send-contract" class="pill-btn pill-contract pill-disabled" type="button">
+            Send Contract
+          </button>
+          <div id="contract-sign-status" class="contract-sign-status" hidden></div>
+        </div>
+        
+        <button id="btn-add-carrier" class="pill-btn pill-add">+ Add Carrier</button>
+        <button id="btn-remove-carrier" class="pill-btn pill-remove pill-disabled">Remove Carrier</button>
+      </div>
+    </div> <!-- end .carrier-right -->
+  </div> <!-- end .carrier-header-top -->
+    <!-- Quick Jump (subtle) -->
+    <nav class="quick-jump" aria-label="Quick jump">
+      <span class="quick-jump-label">Jump to</span>
+  
+      <button type="button" class="quick-jump-link is-active" data-jump="carrier-header">Summary</button>
+      <button type="button" class="quick-jump-link" data-jump="section-safety">Safety</button>
+      <button type="button" class="quick-jump-link" data-jump="section-inspections">Inspections</button>
+      <button type="button" class="quick-jump-link" data-jump="ins-coverages-card">Insurance</button>
+      <button type="button" class="quick-jump-link" data-jump="carrier-documents">Documents</button>
+    </nav>
+  <div class="hero-accent-line"></div>
+
+  <section id="carrier-agreements" class="carrier-agreements glass-card" hidden>
+    <div class="carrier-docs-header">
+      <div class="agreements-left">
+        <div class="agreements-kicker">Agreements</div>
+        <div id="agreements-status" class="agreements-status">No signed agreements yet</div>
+      </div>
+      <div id="agreements-summary-meta" class="docs-summary-meta"></div>
+    </div>
+
+    <div id="agreements-table-wrap" class="docs-table-wrap">
+      <table class="docs-table" aria-label="Carrier agreements">
+        <thead>
+          <tr>
+            <th>Agreement</th>
+            <th>Signed Date</th>
+            <th>Document</th>
+            <th>Certificate</th>
+          </tr>
+        </thead>
+        <tbody id="agreements-table-body"></tbody>
+      </table>
+      <div id="agreements-mobile-list" class="docs-mobile-list" aria-label="Carrier agreements mobile"></div>
+      <div id="agreements-empty" class="docs-empty">No signed agreements yet.</div>
+    </div>
+  </section>
+  
+</section>
+
+
+    <!-- MAIN GRID -->
+    <section class="card-grid">
+
+      <!-- Equipment Summary -->
+      <article id="section-equipment" class="info-card glass-card">
+        <div class="card-header">
+          <h2>Equipment Summary</h2>
+          <span class="card-tag">Assets</span>
+        </div>
+        <dl>
+          <div class="row">
+            <dt>Total Drivers</dt>
+            <dd id="field-totaldrivers">—</dd>
+          </div>
+          <div class="row">
+            <dt>Total Power Units</dt>
+            <dd id="field-totalpowerunits">—</dd>
+          </div>
+        </dl>
+      </article>
+      
+      <!-- Safety Rating -->
+      <article id="section-safety" class="info-card glass-card">
+        <div class="card-header">
+          <h2>Safety Rating</h2>
+          <span class="card-tag">Snapshot</span>
+        </div>
+        <dl>
+          <div class="row">
+            <dt>Safety Rating</dt>
+            <dd id="field-safetyrating">—</dd>
+          </div>
+          <div class="row">
+            <dt>Safety Rating Date</dt>
+            <dd id="field-safetyratingdate">—</dd>
+          </div>
+          <div class="row">
+            <dt>Safety Review Date</dt>
+            <dd id="field-safetyreviewdate">—</dd>
+          </div>
+          <div class="row">
+            <dt>Safety Review Type</dt>
+            <dd id="field-safetyreviewtype">—</dd>
+          </div>
+          <div class="row">
+            <dt>MCS-150 Outdated</dt>
+            <dd id="field-mcs150outdated-dup">—</dd>
+          </div>
+        </dl>
+      </article>
+
+      <!-- Operations & Authority -->
+<article id="section-ops" class="info-card glass-card">
+  <div class="card-header">
+    <h2>Operations &amp; Authority</h2>
+    <span class="card-tag">Profile</span>
+  </div>
+  <dl>
+    <div class="row">
+      <dt>Common Authority Status</dt>
+      <dd id="field-commonauthoritystatus">—</dd>
+    </div>
+    <div class="row">
+      <dt>Contract Authority Status</dt>
+      <dd id="field-contractauthoritystatus">—</dd>
+    </div>
+    <div class="row">
+      <dt>Broker Authority Status</dt>
+      <dd id="field-brokerauthoritystatus">—</dd>
+    </div>
+    <div class="row">
+      <dt>Carrier Operation Code</dt>
+      <dd id="field-carrieroperation_carrieroperationcode">—</dd>
+    </div>
+    <div class="row">
+      <dt>Carrier Operation Description</dt>
+      <dd id="field-carrieroperation_carrieroperationdesc">—</dd>
+    </div>
+  </dl>
+</article>
+
+
+      
+      <!-- Crashes -->
+      <article id="section-crashes" class="info-card glass-card">
+        <div class="card-header">
+          <h2>Crashes</h2>
+          <span class="card-tag">Events</span>
+        </div>
+        <dl>
+          <div class="row">
+            <dt>Total Crashes</dt>
+            <dd id="field-crashtotal">—</dd>
+          </div>
+          <div class="row">
+            <dt>Fatal Crashes</dt>
+            <dd id="field-fatalcrash">—</dd>
+          </div>
+          <div class="row">
+            <dt>Injury Crashes</dt>
+            <dd id="field-injcrash">—</dd>
+          </div>
+          <div class="row">
+            <dt>Towaway Crashes</dt>
+            <dd id="field-towawaycrash">—</dd>
+          </div>
+        </dl>
+      </article>
+
+      <!-- Inspections & OOS -->
+      <article id="section-inspections" class="info-card wide glass-card">
+        <div class="card-header">
+          <h2>Inspections &amp; OOS</h2>
+          <span class="card-tag">Roadside</span>
+        </div>
+        <dl class="two-column">
+          <div class="row">
+            <dt>Driver Inspections</dt>
+            <dd id="field-driverinsp">—</dd>
+          </div>
+          <div class="row">
+            <dt>Driver OOS Inspections</dt>
+            <dd id="field-driveroosinsp">—</dd>
+          </div>
+          <div class="row">
+            <dt>Driver OOS Rate</dt>
+            <dd id="field-driveroosrate">—</dd>
+          </div>
+          <div class="row">
+            <dt>Driver OOS Rate National Avg</dt>
+            <dd id="field-driveroosratenationalaverage">—</dd>
+          </div>
+
+          <div class="row">
+            <dt>HazMat Inspections</dt>
+            <dd id="field-hazmatinsp">—</dd>
+          </div>
+          <div class="row">
+            <dt>HazMat OOS Inspections</dt>
+            <dd id="field-hazmatoosinsp">—</dd>
+          </div>
+          <div class="row">
+            <dt>HazMat OOS Rate</dt>
+            <dd id="field-hazmatoosrate">—</dd>
+          </div>
+          <div class="row">
+            <dt>HazMat OOS Rate National Avg</dt>
+            <dd id="field-hazmatoosratenationalaverage">—</dd>
+          </div>
+
+          <div class="row">
+            <dt>Vehicle Inspections</dt>
+            <dd id="field-vehicleinsp">—</dd>
+          </div>
+          <div class="row">
+            <dt>Vehicle OOS Inspections</dt>
+            <dd id="field-vehicleoosinsp">—</dd>
+          </div>
+          <div class="row">
+            <dt>Vehicle OOS Rate</dt>
+            <dd id="field-vehicleoosrate">—</dd>
+          </div>
+          <div class="row">
+            <dt>Vehicle OOS Rate National Avg</dt>
+            <dd id="field-vehicleoosratenationalaverage">—</dd>
+          </div>
+
+          <div class="row">
+            <dt>OOS Date</dt>
+            <dd id="field-oosdate">—</dd>
+          </div>
+          <div class="row">
+            <dt>OOS Rate National Avg Year</dt>
+            <dd id="field-oosratenationalaverageyear">—</dd>
+          </div>
+        </dl>
+      </article>
+
+
+      <!------ Cargo Carried -->
+
+      <article id="section-cargo" class="info-card wide glass-card">
+        <div class="card-header">
+          <h2>Cargo Carried</h2>
+          <span class="card-tag">FREIGHT</span>
+        </div>
+      
+        <div class="cargo-body">
+          <ul id="cargo-list" class="cargo-list">
+            <li>—</li>
+          </ul>
+        </div>
+      </article>
+
+
+<!-- Insurance Coverages -->
+<article class="info-card glass-card" id="ins-coverages-card">
+  <div class="card-header">
+    <h2>Insurance Coverages</h2>
+    <div class="ins-coverages-header-actions">
+      <button
+        id="btn-raise-insurance-document-review"
+        class="ins-raise-doc-review-btn"
+        type="button"
+        hidden
+      >
+        Raise Document Exception
+      </button>
+      <span class="card-tag">COI</span>
+    </div>
+  </div>
+
+    <!-- NEW: Insurance lock overlay -->
+<div class="alerts-lock-overlay" id="insurance-locked" style="display:none;">
+  <div class="alerts-lock-content">
+    <div class="alerts-lock-title" id="insurance-lock-title">Insurance access isn’t enabled</div>
+    <div class="alerts-lock-sub" id="insurance-lock-body">
+      Upgrade your plan to view carrier insurance coverages.
+    </div>
+    <button class="btn-primary" type="button" id="btn-upgrade-insurance">
+      Upgrade your plan
+    </button>
+  </div>
+</div>
+
+  <div id="ins-coverages-body" class="ins-coverages-body">
+    <div class="cs-hint">Loading…</div>
+  </div>
+</article>
+      
+      
+      <!-- 
+      
+      Counts & Flags 
+      <article class="info-card glass-card">
+        <div class="card-header">
+          <h2>Counts &amp; Flags</h2>
+          <span class="card-tag">Status</span>
+        </div>
+        <dl>
+          <div class="row">
+            <dt>Status Code</dt>
+            <dd id="field-statuscode-dup">—</dd>
+          </div>
+          <div class="row">
+            <dt>Snapshot Date</dt>
+            <dd id="field-snapshotdate-dup">—</dd>
+          </div>
+        </dl>
+      </article>
+
+      -->
+
+      <!-- 
+      
+      FMCSA Links 
+      <article class="info-card glass-card">
+        <div class="card-header">
+          <h2>FMCSA Source Links</h2>
+          <span class="card-tag">Raw Data</span>
+        </div>
+        <dl>
+          <div class="row">
+            <dt>Basics</dt>
+            <dd>
+              <a id="field-link_basics" class="data-link" href="#" target="_blank">—</a>
+            </dd>
+          </div>
+          <div class="row">
+            <dt>Cargo Carried</dt>
+            <dd>
+              <a id="field-link_cargo_carried" class="data-link" href="#" target="_blank">—</a>
+            </dd>
+          </div>
+          <div class="row">
+            <dt>Operation Classification</dt>
+            <dd>
+              <a id="field-link_operation_classification" class="data-link" href="#" target="_blank">—</a>
+            </dd>
+          </div>
+          <div class="row">
+            <dt>Docket Numbers</dt>
+            <dd>
+              <a id="field-link_docket_numbers" class="data-link" href="#" target="_blank">—</a>
+            </dd>
+          </div>
+          <div class="row">
+            <dt>Active For Hire</dt>
+            <dd>
+              <a id="field-link_active_for_hire" class="data-link" href="#" target="_blank">—</a>
+            </dd>
+          </div>
+          <div class="row">
+            <dt>Self Link</dt>
+            <dd>
+              <a id="field-link_self" class="data-link" href="#" target="_blank">—</a>
+            </dd>
+          </div>
+        </dl>
+      </article>
+      -->
+    </section>
+
+      <section id="carrier-documents" class="carrier-agreements glass-card" hidden>
+      <div class="carrier-docs-header">
+        <div class="agreements-left">
+          <div class="agreements-kicker">Documents</div>
+          <div id="documents-summary-status" class="agreements-status">No documents on file</div>
+        </div>
+        <div class="docs-header-right">
+          <div id="documents-type-summary" class="docs-summary-meta"></div>
+          <button id="btn-add-document" type="button" class="cs-btn cs-btn-primary">Add Document</button>
+        </div>
+      </div>
+
+      <div id="documents-table-wrap" class="docs-table-wrap">
+        <table class="docs-table" aria-label="Carrier documents">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>File Name</th>
+              <th>Uploaded Date</th>
+              <th>Uploaded By</th>
+              <th>MIME Type</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="documents-table-body"></tbody>
+        </table>
+        <div id="documents-mobile-list" class="docs-mobile-list" aria-label="Carrier documents mobile"></div>
+        <div id="documents-empty" class="docs-empty">No carrier documents are on file yet.</div>
+      </div>
+    </section>
+  </div>
+<!-- Feature Gate Modal (logged-in upsell / requirements) -->
+<div id="feature-gate-modal" class="cs-modal-backdrop" hidden>
+  <div class="cs-modal glass-card" role="dialog" aria-modal="true" aria-labelledby="feature-gate-title">
+
+    <div class="cs-modal-header">
+      <div class="cs-modal-headings">
+        <div id="feature-gate-title" class="cs-modal-title">Title</div>
+        <div id="feature-gate-body" class="cs-modal-subtitle">Body</div>
+      </div>
+      <button id="feature-gate-close" class="cs-modal-x" type="button" aria-label="Close">×</button>
+    </div>
+
+    <div class="cs-modal-body">
+      <div id="feature-gate-note" class="cs-hint" style="margin-top:-6px;"></div>
+    </div>
+
+    <div class="cs-modal-footer">
+      <div class="cs-footer-right">
+        <button id="feature-gate-cancel" class="cs-btn cs-btn-ghost" type="button">Not now</button>
+        <button id="feature-gate-primary" class="cs-btn cs-btn-primary" type="button">Continue</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="screening-details-modal" class="cs-modal-backdrop" hidden>
+  <div class="cs-modal glass-card" role="dialog" aria-modal="true" aria-labelledby="screening-details-title">
+    <div class="cs-modal-header">
+      <div class="cs-modal-headings">
+        <div id="screening-details-title" class="cs-modal-title">Screening Details</div>
+        <div class="cs-modal-subtitle">Latest screening evaluations for active profiles.</div>
+      </div>
+      <button id="screening-details-close" class="cs-modal-x" type="button" aria-label="Close">×</button>
+    </div>
+    <div id="screening-details-body" class="cs-modal-body">
+      <div class="cs-hint">No screening result.</div>
+    </div>
+    <div class="cs-modal-footer">
+      <div class="cs-footer-right">
+        <button id="screening-details-dismiss" class="cs-btn cs-btn-primary" type="button">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="screening-override-modal" class="cs-modal-backdrop" hidden>
+  <div class="cs-modal glass-card screening-override-modal" role="dialog" aria-modal="true" aria-labelledby="screening-override-title">
+    <div class="cs-modal-header">
+      <div class="cs-modal-headings">
+        <div id="screening-override-title" class="cs-modal-title">Override Rule</div>
+        <div class="cs-modal-subtitle">Apply a temporary or indefinite exception for this carrier rule.</div>
+      </div>
+      <button id="screening-override-close" class="cs-modal-x" type="button" aria-label="Close">×</button>
+    </div>
+    <div class="cs-modal-body screening-override-body">
+      <div class="screening-override-summary">
+        <div class="screening-override-summary-item">
+          <div class="screening-modal-key">Profile</div>
+          <div id="override-profile-name" class="screening-modal-val">—</div>
+        </div>
+        <div class="screening-override-summary-item">
+          <div class="screening-modal-key">Rule</div>
+          <div id="override-check-name" class="screening-modal-val">—</div>
+        </div>
+      </div>
+      <div id="override-current-active" class="cs-hint screening-override-active">No active override</div>
+      <div class="screening-override-section">
+        <div class="cs-label">Override Duration</div>
+        <div class="screening-override-duration-options">
+          <label class="screening-override-radio">
+            <input type="radio" name="override-duration-mode" value="INDEFINITE" checked>
+            <span>Indefinite</span>
+          </label>
+          <label class="screening-override-radio">
+            <input type="radio" name="override-duration-mode" value="DAYS_30">
+            <span>30 Days</span>
+          </label>
+          <label class="screening-override-radio">
+            <input type="radio" name="override-duration-mode" value="UNTIL_DATE">
+            <span>Set Expiration Date</span>
+          </label>
+        </div>
+        <div id="override-expires-wrap" class="screening-override-expiry-input" hidden>
+          <input id="override-expires-at" class="cs-input" type="datetime-local">
+        </div>
+      </div>
+      <div class="screening-override-section">
+        <label class="cs-label" for="override-note">Note (Optional)</label>
+        <textarea id="override-note" class="cs-input screening-override-note" rows="4" placeholder="Optional context for this override"></textarea>
+      </div>
+    </div>
+    <div class="cs-modal-footer">
+      <div id="screening-override-status" class="screening-override-status" aria-live="polite" hidden>Saving override…</div>
+      <div class="cs-footer-right">
+        <button id="screening-override-remove" class="cs-btn cs-btn-ghost" type="button" hidden>Remove Override</button>
+        <button id="screening-override-cancel" class="cs-btn cs-btn-ghost" type="button">Cancel</button>
+        <button id="screening-override-save" class="cs-btn cs-btn-primary" type="button">Save Override</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="screening-override-remove-confirm-modal" class="cs-modal-backdrop" hidden>
+  <div class="cs-modal glass-card screening-remove-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="screening-override-remove-confirm-title">
+    <div class="cs-modal-header">
+      <div class="cs-modal-headings">
+        <div id="screening-override-remove-confirm-title" class="cs-modal-title">Remove Override</div>
+      </div>
+      <button id="screening-override-remove-confirm-close" class="cs-modal-x" type="button" aria-label="Close">×</button>
+    </div>
+    <div class="cs-modal-body">
+      <div class="cs-hint screening-remove-confirm-copy">Are you sure you want to remove this screening override?</div>
+    </div>
+    <div class="cs-modal-footer">
+      <div class="cs-footer-right">
+        <button id="screening-override-remove-confirm-cancel" class="cs-btn cs-btn-ghost" type="button">Cancel</button>
+        <button id="screening-override-remove-confirm-confirm" class="cs-btn cs-btn-danger" type="button">Remove Override</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="insurance-delete-confirm-modal" class="cs-modal-backdrop" hidden>
+  <div class="cs-modal glass-card screening-remove-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="insurance-delete-confirm-title">
+    <div class="cs-modal-header">
+      <div class="cs-modal-headings">
+        <div id="insurance-delete-confirm-title" class="cs-modal-title">Delete Coverage</div>
+      </div>
+      <button id="insurance-delete-confirm-close" class="cs-modal-x" type="button" aria-label="Close">×</button>
+    </div>
+    <div class="cs-modal-body">
+      <p>Delete this coverage and related normalization records? This cannot be undone.</p>
+      <div id="insurance-delete-confirm-error" class="cs-hint" hidden></div>
+    </div>
+    <div class="cs-modal-footer">
+      <button id="insurance-delete-confirm-cancel" class="cs-btn cs-btn-ghost" type="button">Cancel</button>
+      <button id="insurance-delete-confirm-confirm" class="cs-btn cs-btn-danger" type="button">Delete Coverage</button>
+    </div>
+  </div>
+</div>
+
+<div id="insurance-document-review-modal" class="cs-modal-backdrop" hidden>
+  <div class="cs-modal glass-card screening-remove-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="insurance-document-review-title">
+    <div class="cs-modal-header">
+      <div class="cs-modal-headings">
+        <div id="insurance-document-review-title" class="cs-modal-title">Raise Document Exception</div>
+      </div>
+      <button id="insurance-document-review-close" class="cs-modal-x" type="button" aria-label="Close">×</button>
+    </div>
+    <div class="cs-modal-body">
+      <p>
+        Escalate this carrier’s insurance document to document review for follow-up.
+        Existing coverage rows will remain unchanged.
+      </p>
+      <div id="insurance-document-review-success" class="cs-hint insurance-document-review-success" hidden></div>
+      <div id="insurance-document-review-error" class="cs-hint" hidden></div>
+    </div>
+    <div class="cs-modal-footer">
+      <button id="insurance-document-review-cancel" class="cs-btn cs-btn-ghost" type="button">Cancel</button>
+      <button id="insurance-document-review-confirm" class="cs-btn cs-btn-primary" type="button">Raise Exception</button>
+    </div>
+  </div>
+</div>
+
+<div id="add-document-modal" class="cs-modal-backdrop" hidden>
+  <div class="cs-modal glass-card" role="dialog" aria-modal="true" aria-labelledby="add-document-title">
+    <div class="cs-modal-header">
+      <div class="cs-modal-headings">
+        <div id="add-document-title" class="cs-modal-title">Upload Document</div>
+        <div class="cs-modal-subtitle">Attach a document to this carrier profile.</div>
+      </div>
+      <button id="add-document-close" class="cs-modal-x" type="button" aria-label="Close">×</button>
+    </div>
+
+    <form id="add-document-form" class="cs-modal-body docs-upload-form">
+      <label class="cs-label" for="document-type">Document Type</label>
+      <select id="document-type" class="cs-input docs-select" required>
+        <option value="w9">W-9</option>
+        <option value="ach">ACH</option>
+        <option value="other">Other</option>
+      </select>
+
+      <label class="cs-label" for="document-file" style="margin-top:12px;">File</label>
+      <input id="document-file" class="cs-input docs-file-input" type="file" accept=".pdf,image/*" required>
+
+
+      <div id="add-document-error" class="cs-hint docs-upload-error" hidden></div>
+    </form>
+
+    <div class="cs-modal-footer">
+      <div class="cs-footer-right">
+        <button id="add-document-cancel" class="cs-btn cs-btn-ghost" type="button">Cancel</button>
+        <button id="add-document-submit" class="cs-btn cs-btn-primary" type="button">Upload Document</button>
+      </div>
+    </div>
+  </div>
+</div>
+  
+<!-- Email Alerts Modal -->
+<div id="email-alerts-modal" class="cs-modal-backdrop" hidden>
+  <div class="cs-modal glass-card" role="dialog" aria-modal="true" aria-labelledby="email-alerts-title">
+    
+    <div class="cs-modal-header">
+      <div class="cs-modal-headings">
+        <div id="email-alerts-title" class="cs-modal-title">Email Alerts</div>
+        <div class="cs-modal-subtitle">Get updates when something changes for this carrier.</div>
+      </div>
+
+      <button id="email-alerts-close" class="cs-modal-x" type="button" aria-label="Close">×</button>
+    </div>
+
+    <div class="cs-modal-body">
+
+      <!-- ON/OFF switch -->
+      <div class="cs-row cs-row-between">
+        <div>
+          <div class="cs-label">Alerts</div>
+          <div class="cs-hint">Turn on email notifications for carrier changes.</div>
+        </div>
+
+        <label class="cs-toggle" aria-label="Email Alerts On/Off">
+          <input id="email-alerts-enabled" type="checkbox">
+          <span class="cs-toggle-ui"></span>
+        </label>
+      </div>
+
+      <div class="cs-divider"></div>
+
+      <!-- Recipients (default email shows as a selected removable chip too) -->
+      <div class="cs-row cs-row-col">
+        <div class="cs-label">Recipients</div>
+
+        <!-- Chips area includes the default email chip as "locked-on" until user removes -->
+        <div id="email-alerts-chips" class="cs-chips"></div>
+
+        <div class="cs-inline">
+          <input id="email-alerts-input" class="cs-input" type="email" placeholder="Add an email (name@company.com)">
+          <button id="email-alerts-add" class="cs-btn cs-btn-ghost" type="button">Add</button>
+        </div>
+
+
+      </div>
+    </div>
+
+    <div class="cs-modal-footer">
+      <div class="cs-footer-left">
+        <a class="cs-btn cs-btn-manage" href="/account?tab=alerts">
+          Manage Alert Settings
+          <span class="cs-btn-arrow">→</span>
+        </a>
+      </div>
+    
+      <div class="cs-footer-right">
+        <button id="email-alerts-cancel" class="cs-btn cs-btn-ghost" type="button">Cancel</button>
+        <button id="email-alerts-save" class="cs-btn cs-btn-primary" type="button">Save</button>
+      </div>
+    
+    </div>
+
+  </div>
+</div>
+
+ <!-- Contract Sent Modal --> 
+<div id="contractSuccessModal" class="contract-success-modal hidden" aria-hidden="true">
+  <div class="contract-success-backdrop"></div>
+  <div class="contract-success-card" role="dialog" aria-modal="true" aria-labelledby="contractSuccessTitle">
+    <button class="contract-success-close" id="contractSuccessClose" aria-label="Close">×</button>
+    <div class="contract-success-icon">✓</div>
+    <h3 id="contractSuccessTitle">Contract Sent</h3>
+    <p>The contract was successfully sent to the carrier.</p>
+    <div class="contract-success-actions">
+      <button class="cs-btn cs-btn-primary" id="contractSuccessOk" type="button">Got it</button>
+    </div>
+  </div>
+</div>
+
+<!-- Send Contract Modal -->
+<div id="send-contract-modal" class="cs-modal-backdrop" hidden>
+  <div class="cs-modal glass-card" role="dialog" aria-modal="true" aria-labelledby="send-contract-title">
+
+    <div class="cs-modal-header">
+      <div class="cs-modal-headings">
+        <div id="send-contract-title" class="cs-modal-title">Send Contract</div>
+        <div class="cs-modal-subtitle">Send a contract to this carrier’s FMCSA contact and any additional recipients.</div>
+      </div>
+
+      <button id="send-contract-close" class="cs-modal-x" type="button" aria-label="Close">×</button>
+    </div>
+
+    <div class="cs-modal-body">
+
+      <!-- Contract template -->
+      <div class="cs-row cs-row-col">
+        <div class="cs-label">Contract Template</div>
+        <div class="cs-hint">Choose which contract version to send.</div>
+
+        <select id="send-contract-template" class="cs-input" style="width:100%;">
+          <option value="">Loading…</option>
+        </select>
+      </div>
+
+      <div class="cs-divider"></div>
+
+      <!-- Default recipient (locked) -->
+      <div class="cs-row cs-row-col">
+        <div class="cs-label">FMCSA Contact</div>
+        <div class="cs-hint">This is the carrier contact email on file with FMCSA (can’t be removed).</div>
+
+        <div id="send-contract-default-chip" class="cs-chips"></div>
+      </div>
+
+      <div class="cs-divider"></div>
+
+      <!-- Additional recipients -->
+      <div class="cs-row cs-row-col">
+        <div class="cs-label">Additional Recipients</div>
+
+        <div id="send-contract-chips" class="cs-chips"></div>
+
+        <div class="cs-inline">
+          <input id="send-contract-input" class="cs-input" type="email" placeholder="Add an email (name@company.com)">
+          <button id="send-contract-add" class="cs-btn cs-btn-ghost" type="button">Add</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="cs-modal-footer">
+      <div class="cs-footer-left">
+        <a class="cs-btn cs-btn-manage" href="/account?tab=agreements">
+          Manage Contract Settings
+          <span class="cs-btn-arrow">→</span>
+        </a>
+      </div>
+
+      <div class="cs-footer-right">
+        <button id="send-contract-cancel" class="cs-btn cs-btn-ghost" type="button">Cancel</button>
+        <button id="send-contract-send" class="cs-btn cs-btn-primary" type="button">Send</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+  <button
+    id="back-to-overview"
+    class="back-to-overview"
+    aria-label="Back to overview"
+  >
+    Back to top <span class="arrow">↑</span>
+  </button>
+
+
+  <!-- 1. Load Sentry library -->
+  <script
+    src="https://js.sentry-cdn.com/1df77c56ba17c2098baf02e362c93be2.min.js"
+    crossorigin="anonymous"
+  ></script>
+  
+  <!-- 2. Initialize Sentry with YOUR DSN -->
+  <script src="/js/shared/sentry.js"></script>
+  
+  <!-- 3. Your existing shared code -->
+  <script src="/js/shared/shared.js"></script>
+
+<script src="/static/js/pages/carrier.js" defer></script>
+  
+
+<footer id="site-footer"></footer>
+  
+
+</body>
+</html>

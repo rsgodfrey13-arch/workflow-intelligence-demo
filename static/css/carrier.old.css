@@ -1,0 +1,98 @@
+/* ===== carrier profile header (the “circle” area) ===== */
+
+.carrier-header{
+  background:
+    radial-gradient(circle at 0 0, rgba(255,255,255,.12), transparent 55%),
+    linear-gradient(135deg, #111827, #020617);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    0 18px 40px rgba(0,0,0,.65);
+  padding:18px 20px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.carrier-header-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:16px;
+  flex-wrap:wrap;
+}
+
+.carrier-name-block{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+
+.carrier-name{
+  font-size:26px;
+  font-weight:700;
+  letter-spacing:.3px;
+}
+
+.carrier-ids{
+  font-size:14px;
+  color:#C2D5E5;
+}
+
+.carrier-pill{
+  padding:6px 12px;
+  border-radius:999px;
+  background:rgba(248, 180, 80, .18);
+  border:1px solid rgba(248, 180, 80, .7);
+  color:#FED7AA;
+  font-size:13px;
+  font-weight:600;
+  letter-spacing:.3px;
+  text-transform:uppercase;
+}
+
+.carrier-meta-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:16px;
+  font-size:13px;
+  color:#D0E4F5;
+}
+
+.meta-block{
+  min-width:180px;
+}
+
+.meta-label{
+  text-transform:uppercase;
+  font-size:11px;
+  letter-spacing:.18px;
+  color:#8BA1B5;
+  margin-bottom:2px;
+}
+
+.meta-value{
+  font-size:13px;
+  color:#E5F3FF;
+}
+
+/* place the alerts pill next to the carrier name */
+.carrier-name-row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.btn-email-alerts{
+  white-space:nowrap;
+}
+
+/* keep long names from pushing layout too hard */
+#carrier-name{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  max-width: 100%;
+}
