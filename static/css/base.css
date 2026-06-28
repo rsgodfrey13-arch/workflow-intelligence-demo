@@ -901,6 +901,16 @@ border: 1px solid rgba(56, 189, 248, .55);
 /* left already exists; this just makes behavior consistent */
 .nav-left{ display:flex; align-items:center; }
 
+.nav-home-link,
+.nav-home-link:visited,
+.nav-home-link:hover{
+  font-family:var(--cs-font-heading);
+  font-size:1.2rem;
+  font-weight:700;
+  letter-spacing:.04em;
+  color:#F8FAFC;
+}
+
 .nav-center{
   display:flex;
   align-items:center;
@@ -1116,36 +1126,6 @@ border: 1px solid rgba(56, 189, 248, .55);
     min-width: 260px;
   }
 }
-
-/* Tour highlight ONLY for logged-out users */
-.site-header.is-logged-out .nav-link-tour{
-  color: #00B7FF; /* your cyan */
-}
-
-/* Optional: subtle hover without looking like a button */
-.site-header.is-logged-out .nav-link-tour:hover{
-  opacity: 0.9;
-  text-decoration: none;
-}
-
-
-.site-header.is-logged-out #mobile-tour-link{
-  color:#00B7FF;
-  font-weight:600;
-}
-
-.site-header.is-logged-out #mobile-tour-link:hover{
-  color:#38D3FF;
-  background:rgba(56,189,248,0.14);
-}
-
-/* keep icon aligned + calm */
-.nav-link-tour .tour-icon{
-  font-size: 0.9em;
-  margin-right: 4px;
-  opacity: 0.95;
-}
-
 
 .nav-auth-btn,
 .nav-auth-btn:visited,

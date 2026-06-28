@@ -120,33 +120,6 @@ window.showConfirm = function ({
 
 const DESKTOP_AUTH_DISPLAY = "inline-flex";
 
-// Global tour opener so header/footer links can open the modal
-// Open/close the Tour modal (matches tour.js + index.html)
-window.openTour = function (startIndex = 0) {
-  const overlay = document.getElementById("tourOverlay");
-  if (!overlay) {
-    console.warn("Tour overlay not found (#tourOverlay).");
-    return;
-  }
-
-  overlay.setAttribute("aria-hidden", "false");
-  overlay.classList.add("is-open");
-  document.documentElement.classList.add("cs-modal-open");
-
-  // Optional: if you ever expose slide control later, you can store startIndex here.
-};
-
-window.closeTour = function () {
-  const overlay = document.getElementById("tourOverlay");
-  if (!overlay) return;
-
-  overlay.classList.remove("is-open");
-  overlay.setAttribute("aria-hidden", "true");
-  document.documentElement.classList.remove("cs-modal-open");
-};
-
-
-
 // ===============================
 // Access Gate (reusable modal)
 // ===============================
@@ -450,7 +423,6 @@ async function initAuthUI() {
   const mobileAccountLink = document.getElementById("mobile-account-link");
   const mobileLogoutBtn = document.getElementById("mobile-logout-btn");
   const header = document.querySelector(".site-header");
-  const tourLink = document.getElementById("tour-link");
 
   try {
     const res = await fetch("/api/me", { cache: "no-store" });
@@ -460,7 +432,6 @@ async function initAuthUI() {
       // LOGGED IN
       if (loginBtn) loginBtn.style.display = "none";
       if (logoutBtn) logoutBtn.style.display = DESKTOP_AUTH_DISPLAY;
-      if (tourLink) tourLink.style.display = "none";
       window.csIsLoggedIn = true;
       
       if (header) {
@@ -470,13 +441,13 @@ async function initAuthUI() {
 
       if (accountLink) {
         accountLink.style.display = DESKTOP_AUTH_DISPLAY;
-        accountLink.textContent = "User Settings";
+        accountLink.textContent = "Settings";
         accountLink.href = "/account";
       }
 
       if (mobileAccountLink) {
         mobileAccountLink.style.display = "flex";
-        mobileAccountLink.textContent = "User Settings";
+        mobileAccountLink.textContent = "Settings";
         mobileAccountLink.href = "/account";
       }
 
@@ -495,14 +466,10 @@ async function initAuthUI() {
       }
 
 
-      // logged in → no tour click handler needed
-      if (tourLink) tourLink.onclick = null;
-
     } else {
       // LOGGED OUT
       if (loginBtn) loginBtn.style.display = DESKTOP_AUTH_DISPLAY;
       if (logoutBtn) logoutBtn.style.display = "none";
-      if (tourLink) tourLink.style.display = DESKTOP_AUTH_DISPLAY;
       window.csIsLoggedIn = false;
 
       if (header) {
@@ -512,7 +479,7 @@ async function initAuthUI() {
 
       if (accountLink) {
         accountLink.style.display = "none";
-        accountLink.textContent = "User Settings";
+        accountLink.textContent = "Settings";
         accountLink.href = "/login";
       }
 
@@ -543,7 +510,6 @@ async function initAuthUI() {
 
     if (loginBtn) loginBtn.style.display = DESKTOP_AUTH_DISPLAY;
     if (logoutBtn) logoutBtn.style.display = "none";
-    if (tourLink) tourLink.style.display = DESKTOP_AUTH_DISPLAY;
     if (accountLink) accountLink.style.display = "none";
     if (mobileAccountLink) {
       mobileAccountLink.style.display = "flex";

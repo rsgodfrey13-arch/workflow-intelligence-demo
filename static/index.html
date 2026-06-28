@@ -7,7 +7,6 @@
    
 <link rel="stylesheet" href="/static/css/base.css"> 
 <link rel="stylesheet" href="/static/css/style1.css"> 
-<link rel="stylesheet" href="/static/css/tour.css"> 
 
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=AW-16882918169"></script>
@@ -506,61 +505,6 @@
   </div>
 </div>
 
-  
-<!-- TOUR MODAL (put near end of body) -->
-<div class="cs-modal-overlay" id="tourOverlay" aria-hidden="true">
-  <div class="cs-modal" role="dialog" aria-modal="true" aria-labelledby="tourTitle">
-    <button class="cs-modal-x" id="tourClose" aria-label="Close">✕</button>
-
-  <div class="cs-tour-intro-badge" aria-hidden="true">Project</div>
-    
-    
-    <div class="cs-tour">
-    <div class="cs-tour-media">
-      <img id="tourImg" src="/static/help-art/image.png" alt="" />
-    </div>
-
-      <div class="cs-tour-content">
-
-        
-        <div class="cs-tour-kicker">PLATFORM OVERVIEW</div>
-        <h2 class="cs-tour-title" id="tourTitle"></h2>
-        <div class="cs-tour-body" id="tourBody"></div>
-
-<div class="cs-tour-controls">
-  <label class="cs-tour-dontshow">
-    <input type="checkbox" id="tourDontShow" />
-    Don’t show again
-  </label>
-
-  <div class="cs-tour-footer">
-    <div class="cs-tour-dots" id="tourDots"></div>
-
-    <div class="cs-tour-actions">
-      <button class="cs-btn cs-btn-ghost" id="tourPrev" type="button">Back</button>
-
-      <button class="cs-btn cs-btn-primary" id="tourNext" type="button">Next</button>
-      
-      <!-- keep your tourGo button here if you’re using it -->
-      <button class="cs-btn cs-btn-secondary-muted" id="tourGo" type="button" style="display:none;">
-        Continue to the project
-      </button>
-      <button class="cs-btn cs-btn-secondary-muted cs-btn-tour-dismiss" id="tourDismissForever" type="button" style="display:none;">
-        Don’t show this again
-      </button>
-
-    </div>
-  </div>
-
-  <a href="#" class="cs-tour-link" id="tourSkip">Skip Tour</a>
-</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-
 <!-- Confirm Modal (used by window.showConfirm in shared.js) -->
 <div id="confirm-modal" class="import-modal hidden">
   <div class="import-modal-backdrop" aria-hidden="true"></div>
@@ -595,8 +539,6 @@
   <script src="/js/shared/sentry.js"></script>
   
   <!-- 3. Your existing shared code -->
-
-    <script src="/js/pages/tour.js"></script>
 
   
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
