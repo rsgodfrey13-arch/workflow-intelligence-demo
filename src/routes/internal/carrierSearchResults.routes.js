@@ -91,7 +91,7 @@ router.get("/search-carriers", searchLimiter, async (req, res) => {
       contractauthoritystatus,
       brokerauthoritystatus,
       safetyrating,
-      carrier_name_norm,
+      lower(trim(coalesce(legalname, dbaname, ''))) carrier_name_norm,
       CASE
         WHEN dotnumber = $2 THEN 0
         WHEN primary_mc_number = $2 THEN 1
@@ -127,7 +127,7 @@ router.get("/search-carriers", searchLimiter, async (req, res) => {
           contractauthoritystatus,
           brokerauthoritystatus,
           safetyrating,
-          carrier_name_norm,
+          lower(trim(coalesce(legalname, dbaname, ''))) carrier_name_norm,
           CASE
             WHEN carrier_name_norm LIKE $1 THEN 0
             ELSE 1
