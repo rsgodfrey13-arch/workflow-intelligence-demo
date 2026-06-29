@@ -50,7 +50,7 @@ router.get("/search-carriers", searchLimiter, async (req, res) => {
       // name search: prefix first, then contains (carrier_name_norm already lower)
       const prefix = qNorm + "%";
       const contains = "%" + qNorm + "%";
-      whereSql = `WHERE lower(trim(coalesce(legalname, dbaname, ''))) LIKE $1 OR lower(trim(coalesce(legalname, dbaname, ''))) LIKE $2`;
+      whereSql = `WHERE carrier_name_norm LIKE $1 OR carrier_name_norm LIKE $2`;
       params = [prefix, contains];
     }
 
@@ -91,7 +91,7 @@ router.get("/search-carriers", searchLimiter, async (req, res) => {
       contractauthoritystatus,
       brokerauthoritystatus,
       safetyrating,
-      lower(trim(coalesce(legalname, dbaname, ''))) carrier_name_norm,
+      carrier_name_norm,
       CASE
         WHEN dotnumber = $2 THEN 0
         WHEN primary_mc_number = $2 THEN 1
@@ -127,14 +127,14 @@ router.get("/search-carriers", searchLimiter, async (req, res) => {
           contractauthoritystatus,
           brokerauthoritystatus,
           safetyrating,
-          lower(trim(coalesce(legalname, dbaname, ''))) carrier_name_norm,
+          carrier_name_norm,
           CASE
-            WHEN  lower(trim(coalesce(legalname, dbaname, ''))) LIKE $1 THEN 0
+            WHEN carrier_name_norm LIKE $1 THEN 0
             ELSE 1
           END AS rank
         FROM public.carriers
-        WHERE lower(trim(coalesce(legalname, dbaname, ''))) LIKE $1
-           OR lower(trim(coalesce(legalname, dbaname, ''))) LIKE $2
+        WHERE carrier_name_norm LIKE $1
+           OR carrier_name_norm LIKE $2
         ORDER BY rank ASC, ${orderExpr} ${sortDirRaw}
         LIMIT $3
         OFFSET $4;
