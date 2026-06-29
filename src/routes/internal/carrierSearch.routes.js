@@ -70,14 +70,14 @@ router.get("/carrier-search", searchLimiter, async (req, res) => {
         phycity,
         phystate
       FROM public.carriers
-      WHERE carrier_name_norm LIKE $1
-         OR carrier_name_norm LIKE $2
+      WHERE lower(trim(coalesce(legalname, dbaname, ''))) LIKE $1
+         OR lower(trim(coalesce(legalname, dbaname, ''))) LIKE $2
       ORDER BY
         CASE
-          WHEN carrier_name_norm LIKE $1 THEN 0
+          WHEN lower(trim(coalesce(legalname, dbaname, ''))) LIKE $1 THEN 0
           ELSE 1
         END,
-        carrier_name_norm
+        lower(trim(coalesce(legalname, dbaname, '')))
       LIMIT 10;
       `,
       [prefix, contains]
