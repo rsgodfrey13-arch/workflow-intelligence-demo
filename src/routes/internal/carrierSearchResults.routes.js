@@ -145,10 +145,25 @@ router.get("/search-carriers", searchLimiter, async (req, res) => {
 
 
     return res.json({ rows: rowsResult.rows, total });
-  } catch (err) {
-    console.error("search-carriers error", err);
-    return res.status(500).json({ error: "Search failed" });
-  }
+} catch (err) {
+  console.error("search-carriers error", {
+    message: err.message,
+    code: err.code,
+    detail: err.detail,
+    hint: err.hint,
+    position: err.position,
+    stack: err.stack
+  });
+
+  return res.status(500).json({
+    error: "Search failed",
+    message: err.message,
+    code: err.code,
+    detail: err.detail,
+    hint: err.hint,
+    position: err.position
+  });
+}
 });
 
 module.exports = router;
